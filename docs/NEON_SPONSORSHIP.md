@@ -12,11 +12,12 @@ Miu's core desktop tasks work locally. Its optional community catalog stores cur
 
 | Item | Current preparation | Remaining maintainer action |
 | --- | --- | --- |
-| OSI-approved project license | MIT file prepared for original Miu source | Review ownership/provenance and publish the actual source with its notices. |
-| Public GitHub repository | Project repository: [KumarManuSaraswat/miu](https://github.com/KumarManuSaraswat/miu) | Confirm the reviewed source, license, and development history are public before applying. A repository containing only a placeholder README is not the completed project. |
-| Active development | Implementation and local validation work exist | Publish real commits/releases/issues so reviewers can inspect activity. |
+| OSI-approved project license | Original Miu source is publicly released under [MIT](https://github.com/KumarManuSaraswat/miu/blob/v0.1.0/LICENSE), with third-party notices | Maintain attribution and review provenance/licenses when adding contributions or dependencies. |
+| Public GitHub repository | Reviewed source and [v0.1.0 release](https://github.com/KumarManuSaraswat/miu/releases/tag/v0.1.0) are public in [KumarManuSaraswat/miu](https://github.com/KumarManuSaraswat/miu) | Keep source, release notes, checksums, and support/privacy information current. |
+| Active development | Public commit history, the initial release, and passing [build/validation CI](https://github.com/KumarManuSaraswat/miu/actions/workflows/windows.yml) are available | Continue publishing real maintenance activity; an initial release does not establish long-term activity or adoption. |
 | GitHub Sponsors | Not established by this work | Enable an eligible profile and complete GitHub's required payout/tax setup. |
-| Website/project page | No verified public URL supplied | Publish an accurate project page and privacy/security information. |
+| Website/project page | The public [repository project page](https://github.com/KumarManuSaraswat/miu#readme) includes setup, privacy, and security links | Use the actual project-page URL in an application; no separate website is claimed. |
+| Optional Neon integration | The [public catalog](https://miu-preset-catalog.kumar-saraswat-s-125.workers.dev/v1/presets) is live on Neon Free and Workers Free; all six profiles were verified with the desktop client | Monitor quotas and maintain read-only access. Users enter the address manually; v0.1.0 still bundles no endpoint and its release assets remain unchanged. |
 | Contact email | Choose a monitored project email when applying | Review the contact address in the final application before sharing it. |
 | Community evidence | No public adoption statistics verified | Supply only measured, public usage or contributor evidence when it exists. |
 | Sponsor branding | None added | Add a clearly labeled placement only after an actual agreement. |

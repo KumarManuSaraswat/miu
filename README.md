@@ -67,9 +67,15 @@ Miu -- explicit public GET --> Cloudflare Worker -- read-only query --> Neon Pos
 
 Database credentials stay in the Worker secret store. The desktop app receives no database password and sends no email, chat, audio, or account credentials to the catalog. A fetch shares ordinary connection metadata, including IP address, with the host. There is no background refresh or user-upload endpoint.
 
-Three built-in profiles work offline. For hosted profiles, open **Companion presets → Community catalog**, enter your maintainer's HTTPS `/v1/presets` address, and click **Load community presets**. Apply a profile explicitly. No shared hosted endpoint is bundled yet.
+Three built-in profiles work offline. The [public Miu catalog](https://miu-preset-catalog.kumar-saraswat-s-125.workers.dev/v1/presets) is live with six curated profiles. To try it, open **Companion presets → Community catalog**, paste this address, and click **Load community presets**:
 
-The service is designed for Neon Free and Workers Free. Deployment instructions include quota checks and read-only credentials; hosting has limits and is not a promise of unlimited free operation. A real Neon deployment must be tested separately from local mocks.
+```text
+https://miu-preset-catalog.kumar-saraswat-s-125.workers.dev/v1/presets
+```
+
+Apply a profile explicitly after loading. The published **v0.1.0** app still has a blank catalog address by default; no endpoint was added to its release assets. Loading the catalog is a manual, optional connection.
+
+The service runs on Neon Free and Workers Free. Its live response and all six profiles have been checked with the desktop catalog client. Hosting quotas still apply; this is not a promise of unlimited availability. Built-in presets remain available if the service is unavailable. Deployment instructions include quota checks and read-only credentials.
 
 ## Memory and privacy
 
