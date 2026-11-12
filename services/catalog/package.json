@@ -1,0 +1,22 @@
+{
+  "name": "miu-public-preset-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:integration": "node scripts/check-integration.js",
+    "dev": "wrangler dev --local",
+    "check:bundle": "wrangler deploy --dry-run --outdir .build",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.161.0"
+  }
+}

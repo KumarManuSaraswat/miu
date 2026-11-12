@@ -1,0 +1,28 @@
+name: Feature request
+description: Suggest a focused improvement to Miu.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem should this solve?
+      description: Describe the task and who would benefit without including private content.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Proposed behavior
+      description: Explain what the user would do and what Miu should do in response.
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Costs and constraints
+      description: Mention any added RAM, background activity, paid service, account access, or permission requirements.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: A smaller change or an existing workflow may address the same need.
