@@ -1,0 +1,69 @@
+name: Windows build and release checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: powershell
+    env:
+      MIU_DATA_DIR: ${{ github.workspace }}\.cache\miu-isolated-ci-data
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build and run offline app and voice tests
+        run: .\build.ps1 -Test
+      - name: Install Node for the optional catalog checks
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install locked catalog dependencies
+        working-directory: services/catalog
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test the catalog without database credentials
+        working-directory: services/catalog
+        run: npm test
+      - name: Check the Worker bundle without deploying
+        working-directory: services/catalog
+        run: npm run check:bundle
+      - name: Exercise archive privacy and path guards
+        run: .\scripts\verify-release.ps1 -SelfTest
+      - name: Exercise voice installer guards without downloading
+        run: .\scripts\setup-voice.ps1 -SelfTest
+      - name: Package the lean source and portable releases
+        run: .\scripts\package-release.ps1 -Version 0.1.0
+      - name: Verify ZIP allowlists and SHA-256 manifests
+        run: .\scripts\verify-release.ps1 -Version 0.1.0
+      - name: Build and test the clean source archive
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $sourceCheck = Join-Path $env:RUNNER_TEMP ('miu-source-check-' + [Guid]::NewGuid().ToString('N'))
+          [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $env:GITHUB_WORKSPACE 'artifacts\releases\0.1.0\miu-0.1.0-source.zip'), $sourceCheck)
+          & (Join-Path $sourceCheck 'miu-0.1.0-source\build.ps1') -Test
+      - name: Retain verified artifacts for review
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: miu-0.1.0-reviewed-packages
+          path: |
+            artifacts/releases/0.1.0/miu-0.1.0-source.zip
+            artifacts/releases/0.1.0/miu-0.1.0-windows-x64.zip
+            artifacts/releases/0.1.0/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

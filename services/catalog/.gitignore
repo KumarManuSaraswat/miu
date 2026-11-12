@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+.build/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.dev.vars.example
+npm-debug.log*

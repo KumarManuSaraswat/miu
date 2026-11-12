@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup and support guide
+    url: https://github.com/KumarManuSaraswat/miu/blob/main/SUPPORT.md
+    about: Start here for setup questions, troubleshooting, and what to include in a public report.
+  - name: Report a security or privacy vulnerability
+    url: https://github.com/KumarManuSaraswat/miu/security/advisories/new
+    about: Use private vulnerability reporting. If unavailable, follow SECURITY.md without publishing sensitive details.
