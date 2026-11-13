@@ -12,7 +12,7 @@ Built by a group of developers led by **Ancient Dragon**. Miu's included offline
 
 ## Android
 
-Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0)** on a phone and open it to install. The native Android app includes Gemma 3 1B for offline chat, 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a floating mascot, and the optional Neon-backed preset catalog. Allow about 3 GB free storage for installation and first-use preparation. A 64-bit ARM phone with Android 9+ and at least 4 GB RAM is recommended. Voice requires microphone permission and a suitable installed English speech pack; typing works independently.
+Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1)** on a phone and open it to install. The native Android app includes Gemma 3 1B for offline chat, 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a floating mascot, and the optional Neon-backed preset catalog. Allow about 3 GB free storage for installation and first-use preparation. A 64-bit ARM phone with Android 9+ and at least 4 GB RAM is recommended. Voice requires microphone permission and a suitable installed English speech pack; typing works independently.
 
 Choose Miu through **Settings → Use Miu as phone assistant** to open a compact black mascot panel with your phone's assistant gesture. It supports voice, typing, animated replies and an explicit Open app button. The full app has a refreshed Talk, Looks and Settings layout. Power-button behavior depends on the phone; Miu does not intercept hardware keys or need overlay permission for this panel.
 
@@ -24,7 +24,7 @@ The remaining sections describe the **Windows** app. Its Gmail API integration a
 
 ## Windows: start
 
-Download `miu-1.0.0-windows-x64.zip` from [Releases](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0), extract it into a writable folder, and double-click **Start Miu.cmd**. Keep its folders together. Windows with .NET Framework 4.8 is required; Windows 11 x64 and 8 GB RAM are recommended. The executable is currently unsigned. Releases include SHA-256 checksums.
+Download `miu-1.0.1-windows-x64.zip` from [Releases](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1), extract it into a writable folder, and double-click **Start Miu.cmd**. Keep its folders together. Windows with .NET Framework 4.8 is required; Windows 11 x64 and 8 GB RAM are recommended. The executable is currently unsigned. Releases include SHA-256 checksums.
 
 The ready-to-use download includes Gemma, offline English recognition and the natural English voice. No setup scripts or separate AI downloads are needed. Allow about 3 GB free space for the ZIP and extraction. Dependency licenses and speech sources travel with the download; see [speech bundle details](docs/SPEECH_BUNDLE.md). Developer/CI archives omit downloaded runtimes and are not the end-user bundle.
 

@@ -47,23 +47,23 @@ jobs:
       - name: Exercise voice installer guards without downloading
         run: .\scripts\setup-voice.ps1 -SelfTest
       - name: Package the lean source and portable releases
-        run: .\scripts\package-release.ps1 -Version 1.0.0
+        run: .\scripts\package-release.ps1 -Version 1.0.1
       - name: Verify ZIP allowlists and SHA-256 manifests
-        run: .\scripts\verify-release.ps1 -Version 1.0.0
+        run: .\scripts\verify-release.ps1 -Version 1.0.1
       - name: Build and test the clean source archive
         run: |
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $sourceCheck = Join-Path $env:RUNNER_TEMP ('miu-source-check-' + [Guid]::NewGuid().ToString('N'))
-          [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $env:GITHUB_WORKSPACE 'artifacts\releases\1.0.0\miu-1.0.0-source.zip'), $sourceCheck)
-          & (Join-Path $sourceCheck 'miu-1.0.0-source\build.ps1') -Test
+          [IO.Compression.ZipFile]::ExtractToDirectory((Join-Path $env:GITHUB_WORKSPACE 'artifacts\releases\1.0.1\miu-1.0.1-source.zip'), $sourceCheck)
+          & (Join-Path $sourceCheck 'miu-1.0.1-source\build.ps1') -Test
       - name: Retain lean CI artifacts (not public offline bundles)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: miu-1.0.0-reviewed-packages
+          name: miu-1.0.1-reviewed-packages
           path: |
-            artifacts/releases/1.0.0/miu-1.0.0-source.zip
-            artifacts/releases/1.0.0/miu-1.0.0-windows-x64.zip
-            artifacts/releases/1.0.0/SHA256SUMS.txt
+            artifacts/releases/1.0.1/miu-1.0.1-source.zip
+            artifacts/releases/1.0.1/miu-1.0.1-windows-x64.zip
+            artifacts/releases/1.0.1/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
           compression-level: 0

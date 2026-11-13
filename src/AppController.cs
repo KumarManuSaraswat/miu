@@ -111,7 +111,7 @@ namespace Miu
                     case "wake": SetSleeping(false); break;
                     case "mute": Settings.VoiceEnabled = false; ApplySettings(); break;
                     case "unmute": Settings.VoiceEnabled = true; ApplySettings(); break;
-                    case "clear": engine.ClearConversation(); Chat.ClearMessages(); Chat.AddMessage(reply.Text, false); break;
+                    case "clear": engine.ClearConversation(); Chat.ClearMessages(); Chat.AddMessage(reply.Text, false); PreviewMood(Settings.PreferredMood); break;
                 }
                 if (Settings.VoiceEnabled && !Sleeping) Speech.Speak(reply.Text);
             }
@@ -145,7 +145,7 @@ namespace Miu
         public void SetSleeping(bool sleeping) { Sleeping = sleeping; if (sleeping) { if (pending != null) pending.Cancel(); Speech.StopListening(); Speech.StopSpeaking(); Chat.Hide(); } SetReady(); }
         private void SetReady() { Mascot.SetMood(Sleeping ? "sleepy" : responseMood, Sleeping ? "Resting" : "Click to chat"); Chat.SetStatus(Sleeping ? "Resting · microphone off" : "Ready when you are"); }
         public void PreviewMood(string mood) { responseMood = mood; Sleeping = false; Mascot.SetMood(mood, ExpressionCatalog.Label(mood)); if (!Busy && !Speech.IsSpeaking && !Speech.IsListening) Chat.SetStatus("Ready when you are"); }
-        public void ClearConversation() { if (Busy) CancelCurrent(); engine.ClearConversation(); Speech.StopSpeaking(); Chat.ClearMessages(); }
+        public void ClearConversation() { if (Busy) CancelCurrent(); engine.ClearConversation(); Speech.StopSpeaking(); Chat.ClearMessages(); responseMood = Settings.PreferredMood; SetReady(); }
         public bool ApplySettings() { Speech.Rate = Settings.SpeechRate; Speech.UseNaturalVoice = Settings.NaturalVoiceEnabled; if (!Settings.VoiceEnabled) Speech.StopSpeaking(); Mascot.Topmost = Settings.AlwaysOnTop; SetReady(); Chat.UpdateSettings(); return SaveSettings(); }
         public bool SaveSettings() { try { Settings.Save(); return true; } catch { Chat.SetStatus("Settings could not be saved"); return false; } }
         public void Exit() { if (IsExiting) return; IsExiting = true; SaveSettings(); Dispose(); Application.Current.Shutdown(); }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1 — conversational reactions
+
+- Restored contextual faces for offline Gemma replies on Windows and Android.
+- A small local text-cue layer chooses gentle, curious, playful, celebratory and other conversational expressions without another model or network call. It leaves Gemma's answer unchanged; it is not audio emotion recognition.
+- Android Talk and the compact assistant retain the reply's expression during speech, after speech finishes, and across rotation. Speech animates the mouth independently of the eyes and expression.
+- Resting-face selection and reduced-motion settings remain available. Added reaction, negation and speech-state regressions.
+
 ## 1.0.0 — offline companion
 
 - Consistent creator credit for Ancient Dragon, with separate Google Gemma model attribution.

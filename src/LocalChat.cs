@@ -14,7 +14,7 @@ namespace Miu
     internal interface ILocalChat : IDisposable
     {
         bool IsAvailable { get; }
-        Task<string> ReplyAsync(string message, CancellationToken cancellation);
+        Task<ConversationReply> ReplyAsync(string message, CancellationToken cancellation);
         void Clear();
     }
 
@@ -37,7 +37,7 @@ namespace Miu
         public bool IsAvailable { get { return File.Exists(EnginePath) && File.Exists(ModelPath); } }
         public void Clear() { lock (sync) { history.Clear(); version++; } }
 
-        public async Task<string> ReplyAsync(string message, CancellationToken cancellation)
+        public async Task<ConversationReply> ReplyAsync(string message, CancellationToken cancellation)
         {
             if (String.IsNullOrWhiteSpace(message)) throw new ArgumentException("Type a message first.");
             if (message.Length > 1200) throw new InvalidOperationException("Please keep this question under 1,200 characters for the small offline model.");
@@ -59,7 +59,7 @@ namespace Miu
             }
         }
 
-        private string Run(string message, CancellationToken token)
+        private ConversationReply Run(string message, CancellationToken token)
         {
             if (!IsAvailable) throw new InvalidOperationException("The offline model is missing. Extract the complete Miu download, including its models and local-ai folders.");
             if (!verified)
@@ -118,7 +118,7 @@ namespace Miu
                             history.Add(new Dictionary<string, string> { { "user", EscapeTokens(Clip(message, 300)) }, { "miu", EscapeTokens(Clip(answer, 400)) } });
                             while (history.Count > 2) history.RemoveAt(0);
                         }
-                        return answer;
+                        return ConversationReply.FromText(message, answer);
                     }
                 }
                 finally { Kill(process); }

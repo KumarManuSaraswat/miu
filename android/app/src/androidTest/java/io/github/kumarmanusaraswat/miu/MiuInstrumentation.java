@@ -350,8 +350,15 @@ public final class MiuInstrumentation extends Instrumentation {
                 awaitText("Paris", 120000),
                 "Bundled model did not answer the first offline question");
         check(!engine.running(), "Model process retained after first answer");
+        checkReactionSpeech("curious");
         runOnMainSync(() -> activity.submit("Which country is that city in?"));
         check(awaitText("France", 90000), "Model follow-up lost recent conversation");
+        runOnMainSync(() -> activity.submit("My best friend moved away today and I feel lonely."));
+        check(awaitMood("sad", 90000), "Gemma reply did not select an empathetic face in Talk");
+        checkReactionSpeech("sad");
+        runOnMainSync(() -> activity.submit("I finally passed the exam I was worried about!"));
+        check(awaitMood("delighted", 90000), "Gemma reply did not celebrate good news in Talk");
+        checkReactionSpeech("delighted");
         runOnMainSync(() ->
                 activity.submit("Write a very long story about a robot exploring a new planet."));
         long until = android.os.SystemClock.elapsedRealtime() + 12000;
@@ -381,6 +388,10 @@ public final class MiuInstrumentation extends Instrumentation {
         runOnMainSync(() -> activity.submit("What is the capital city of France? Answer briefly."));
         check(awaitText("Paris", 90000), "Compact assistant did not answer using offline AI");
         check(!compactEngine.running(), "Compact assistant retained its model after replying");
+        checkReactionSpeech("curious");
+        runOnMainSync(() -> activity.submit("My best friend moved away today and I feel lonely."));
+        check(awaitMood("sad", 90000), "Compact Gemma reply lost its empathetic reaction");
+        checkReactionSpeech("sad");
         runOnMainSync(() ->
                 activity.submit("Write a very long story about a robot exploring a new planet."));
         until = android.os.SystemClock.elapsedRealtime() + 12000;
@@ -392,6 +403,42 @@ public final class MiuInstrumentation extends Instrumentation {
         while (compactEngine.running() && android.os.SystemClock.elapsedRealtime() < until)
             Thread.sleep(100);
         check(!compactEngine.running(), "Closing the panel retained the model process");
+    }
+
+    private MascotView mascot() {
+        try {
+            java.lang.reflect.Field field = MainActivity.class.getDeclaredField("mascot");
+            field.setAccessible(true);
+            return (MascotView) field.get(activity);
+        } catch (ReflectiveOperationException ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    private boolean awaitMood(String mood, long timeout) throws Exception {
+        long until = android.os.SystemClock.elapsedRealtime() + timeout;
+        while (android.os.SystemClock.elapsedRealtime() < until) {
+            boolean[] found = {false};
+            runOnMainSync(() -> found[0] = mascot().getMood().equals(mood));
+            if (found[0]) return true;
+            Thread.sleep(200);
+        }
+        return false;
+    }
+
+    private void checkReactionSpeech(String expected) {
+        runOnMainSync(() -> {
+            MascotView face = mascot();
+            check(expected.equals(face.getMood()), "Reply reaction was replaced before speech");
+            activity.state("Speaking test", "speaking");
+            check(
+                    expected.equals(face.getMood()) && face.isTalking(),
+                    "Speech replaced the expression");
+            activity.state("Ready when you are", "idle");
+            check(
+                    expected.equals(face.getMood()) && !face.isTalking(),
+                    "Speech completion lost the reaction");
+        });
     }
 
     private boolean awaitText(String text, long timeout) throws Exception {

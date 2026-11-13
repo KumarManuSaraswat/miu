@@ -10,7 +10,7 @@ Miu is designed to stay useful in your pocket without a server. Its small offlin
 
 ## Install and share
 
-Download **miu-1.0.0-android.apk** from the [Android release](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0) directly on your phone. Open it and approve installation from the browser or file manager you used. You can turn that installer permission off afterward. The APK is signed by the Miu project; updates must use the same signing certificate. No Play Store purchase is required.
+Download **miu-1.0.1-android.apk** from the [Android release](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1) directly on your phone. Open it and approve installation from the browser or file manager you used. You can turn that installer permission off afterward. The APK is signed by the Miu project; updates must use the same signing certificate. No Play Store purchase is required.
 
 Share the release link or the APK itself. Each person grants their own optional permissions and supplies their own AI key if they want cloud conversation. There are no maintainer credentials in the download. Verify the APK against the release's `SHA256SUMS.txt` if needed.
 

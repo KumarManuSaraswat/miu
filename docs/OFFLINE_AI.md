@@ -27,6 +27,21 @@ Gemma. Android uses the phone's installed speech services and English language
 pack. Microphone permission, offline speech-pack installation, default-assistant
 selection and optional screen access remain Android-managed setup steps.
 
+## Conversational faces
+
+Miu 1.0.1 selects a reaction from the typed or recognized request and the reply's
+text. Good news can produce a delighted face, distress an empathetic face, jokes
+a playful face, and explanations a curious face. These are small local rules,
+not a second AI model or analysis of your voice's emotional tone. They can miss
+nuance, sarcasm and unfamiliar wording. Unmatched conversation uses a calm face.
+
+The reaction stays visible while the mouth animates during speech and after the
+answer finishes. Android keeps it across rotation too. Listening and thinking
+temporarily show their own activity faces. Clearing the conversation or choosing
+a resting face resets the expression. Reduced motion still disables movement.
+Reaction selection does not change the answer, persist an emotion profile, send
+text to a service, or give generated text access to device commands.
+
 ## Measurements, 13 November 2026
 
 CPU-only checks used an i5-11400H Windows laptop with 16 GB RAM and an Android 16
