@@ -2,11 +2,11 @@
 
 ## 1.0 offline model checks — 13 November 2026
 
-The model-enabled development APK passed **70 device checks** on the same Android
+The model-enabled development APK passed **75 device checks** on the same Android
 16 ARM64 phone. This includes extraction/checksum verification of the bundled
 Gemma 3 model, a capital-city answer, a contextual follow-up, Stop, clock routing
 after cancellation, a real answer in the compact black assistant panel and model
-process cleanup after replying or closing the panel. No cloud key or live catalog
+process cleanup after replying or closing the panel. Synthetic final speech callbacks also verify automatic submission in both surfaces, optional uncertain-speech review, and Ancient Dragon creator credit. Actual microphone/provider behavior still needs the separate owner voice check. No cloud key or live catalog
 was used in this run. Debug unit tests and lint passed. Model resource measurements
 and the Gemma 4 comparison are in [OFFLINE_AI.md](../docs/OFFLINE_AI.md).
 

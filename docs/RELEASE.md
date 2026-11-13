@@ -24,9 +24,9 @@ The commands below validate source/build inputs without downloading models. Thei
 
 ## Distribution policy
 
-The source package contains Miu's original source, tests, build/release scripts, documentation, project assets, and the optional community-catalog service. The portable package contains the app, its recognition-worker wrapper, launch script, documentation, and optional voice download scripts. Deploying the catalog service is a separate maintainer operation; its source is not included in the portable app ZIP.
+The source package contains Miu's original source, tests, build/release scripts, documentation, project assets, and the optional community-catalog service. The lean CI portable package contains the app, its recognition-worker wrapper, launch script, documentation, and optional voice download scripts. Deploying the catalog service is a separate maintainer operation; its source is not included in the portable app ZIP.
 
-**Neither release package contains downloaded Vosk/Piper engines, native dependency DLLs, or voice models.** Windows and .NET Framework are prerequisites, not redistributed project files. The optional setup scripts download upstream voice components after the user chooses to install them.
+**Lean CI/source packages omit model and speech runtime binaries.** The end-user Windows bundle includes them through `package-ready-release.ps1`, with licenses and speech sources. Windows and .NET Framework are prerequisites, not redistributed project files. Developers can use the optional setup scripts to obtain speech components separately.
 
 The [MIT License](../LICENSE) applies to Miu's original contributions. It does not relicense upstream software or models. In particular, the optional older Piper native archive includes components with different licenses, including the eSpeak NG GPL component; the archive is not an MIT-only bundle. See [THIRD_PARTY.md](THIRD_PARTY.md). Do not add downloaded voice folders to a release ZIP without first reviewing the exact versions' license notices, redistribution and source requirements. A separate process or download script is not, by itself, a legal conclusion about every combination of software.
 

@@ -1070,8 +1070,8 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         c.addView(
                 text(
                         "Off by default: when you finish speaking, Miu sends the recognized request"
-                            + " and answers automatically. Turn this on to check low-confidence"
-                            + " speech before sending.",
+                                + " and answers automatically. Turn this on to check low-confidence"
+                                + " speech before sending.",
                         12,
                         MUTED));
         toggle(

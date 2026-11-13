@@ -2,6 +2,9 @@
 
 ## 1.0.0 — offline companion
 
+- Consistent creator credit for Ancient Dragon, with separate Google Gemma model attribution.
+- Android final speech submits automatically in Talk and the compact assistant; uncertain-speech review is optional.
+
 - Included Gemma 3 1B Q4_K_M for Android ARM64 and Windows x64: no account, GPU or inference server required.
 - Bounded in-memory conversation, local model integrity checks, cancellation and process unloading between replies.
 - Local commands remain independent of model output; no automatic cloud fallback.
