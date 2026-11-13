@@ -35,12 +35,14 @@ public final class MiuInstrumentation extends Instrumentation {
         Prefs prefs = new Prefs(getTargetContext());
         boolean voice = prefs.voice();
         boolean assistantAutoListen = prefs.values.getBoolean("assistant_auto_listen", false);
+        boolean reviewSpeech = prefs.values.getBoolean("review_uncertain_speech", false);
         try {
             prefs.values
                     .edit()
                     .putBoolean("voice", false)
                     .putBoolean("cloud", false)
                     .putBoolean("assistant_auto_listen", false)
+                    .putBoolean("review_uncertain_speech", false)
                     .commit();
             activity =
                     (MainActivity)
@@ -311,6 +313,7 @@ public final class MiuInstrumentation extends Instrumentation {
                     .edit()
                     .putBoolean("voice", voice)
                     .putBoolean("assistant_auto_listen", assistantAutoListen)
+                    .putBoolean("review_uncertain_speech", reviewSpeech)
                     .apply();
         }
     }
@@ -326,6 +329,22 @@ public final class MiuInstrumentation extends Instrumentation {
         field.setAccessible(true);
         LocalChat engine = (LocalChat) field.get(activity);
         check(engine.packaged(), "Ready-to-use build is missing its model/runtime");
+        runOnMainSync(() -> activity.submit("Who built you?"));
+        check(awaitText("Ancient Dragon", 5000), "Creator answer lost Miu's project lead");
+        check(!engine.running(), "Creator answer should not need model inference");
+        runOnMainSync(() -> activity.heard("what time is it", true));
+        check(awaitText("It’s ", 5000), "Final speech still needs Send in Talk");
+        Prefs speechPrefs = new Prefs(getTargetContext());
+        speechPrefs.values.edit().putBoolean("review_uncertain_speech", true).commit();
+        runOnMainSync(() -> activity.heard("Who built you?", true));
+        runOnMainSync(() ->
+                check(
+                        findText(
+                                        activity.getWindow().getDecorView(),
+                                        "Please check what I heard, then tap Send.")
+                                != null,
+                        "Optional uncertain-speech review was ignored"));
+        speechPrefs.values.edit().putBoolean("review_uncertain_speech", false).commit();
         runOnMainSync(() -> activity.submit("What is the capital city of France? Answer briefly."));
         check(
                 awaitText("Paris", 120000),
@@ -355,6 +374,10 @@ public final class MiuInstrumentation extends Instrumentation {
                                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         waitForIdleSync();
         LocalChat compactEngine = (LocalChat) field.get(activity);
+        runOnMainSync(() -> activity.heard("Who built you?", true));
+        check(
+                awaitText("Ancient Dragon", 5000),
+                "Final speech still needs Send in the compact panel");
         runOnMainSync(() -> activity.submit("What is the capital city of France? Answer briefly."));
         check(awaitText("Paris", 90000), "Compact assistant did not answer using offline AI");
         check(!compactEngine.running(), "Compact assistant retained its model after replying");

@@ -6,6 +6,25 @@ import org.junit.Test;
 
 public class LocalCompanionTest {
     @Test
+    public void productCreatorIsSeparateFromTheOfflineModel() {
+        LocalCompanion companion = new LocalCompanion();
+        for (String question :
+                new String[] {
+                    "who built you?",
+                    "Who created Miu?",
+                    "who is your creator",
+                    "who leads this project",
+                    "who is Ancient Dragon?"
+                }) {
+            assertEquals(LocalCompanion.CREATOR_REPLY, companion.answer(question).text);
+        }
+        assertNull(companion.answer("who built the pyramids"));
+        assertNull(companion.answer("who developed Gemma"));
+        assertTrue(LocalCompanion.CREATOR_REPLY.contains("Ancient Dragon"));
+        assertTrue(LocalCompanion.CREATOR_REPLY.contains("Google's Gemma"));
+    }
+
+    @Test
     public void everydayCompanyNeedsNoServer() {
         LocalCompanion companion = new LocalCompanion();
         assertNotNull(companion.answer("How are you?"));

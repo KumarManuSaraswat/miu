@@ -8,6 +8,15 @@ import java.util.regex.Pattern;
 
 /** Small offline conversational skills, not a language model or a claim of general intelligence. */
 final class LocalCompanion {
+    static final String CREATOR_REPLY =
+            "Miu was built by a group of developers led by Ancient Dragon. My offline AI uses"
+                    + " Google's Gemma model.";
+    private static final String CREATOR_PATTERN =
+            "who (?:built|made|created|developed|designed) (?:you|miu|this app)|who (?:is|are)"
+                + " (?:your|miu's|the) (?:creators?|developers?|makers?)|who (?:leads|runs)"
+                + " (?:miu|this project|the miu project)|who is ancient dragon|tell me about your"
+                + " (?:creator|developers?)";
+
     static final class Reply {
         final String text, mood;
 
@@ -27,6 +36,7 @@ final class LocalCompanion {
     Reply answer(String raw) {
         String s = raw.trim().toLowerCase(Locale.ROOT).replaceAll("[?!.]+$", "").replace('’', '\'');
         s = s.replaceFirst("^(?:hey |hi )?miu[, ]+", "");
+        if (s.matches(CREATOR_PATTERN)) return reply(CREATOR_REPLY, "content");
         if (s.matches("how are you(?: doing)?|how's it going|are you (?:there|awake)|you there"))
             return reply(
                     "I’m here, with a little room for whatever your day brings. How are you doing?",
@@ -94,9 +104,9 @@ final class LocalCompanion {
                 "do you (?:work|need to be) offline|are you offline|do you need (?:a"
                         + " server|internet)|can you work offline"))
             return reply(
-                    "My local skills and reactions don’t need a server. Voice depends on the speech"
-                        + " services installed on this phone. AI chat and shared preset downloads"
-                        + " are optional online extras.",
+                    "My local skills, reactions and included Gemma chat work without a server."
+                        + " Voice depends on the speech services and language packs installed on"
+                        + " this phone. Cloud chat and shared preset downloads are optional.",
                     "content");
         if (s.matches("stay with me|keep me company|can you keep me company"))
             return reply(

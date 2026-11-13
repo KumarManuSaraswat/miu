@@ -249,6 +249,12 @@ namespace Miu
                 check(answer.Text == "open calculator" && answer.Action == null && local.Calls == 1, "Offline model output cannot execute a device command");
                 engine.HandleAsync("what time is it", CancellationToken.None).GetAwaiter().GetResult();
                 check(local.Calls == 1, "Clock works without loading the model");
+                foreach (string question in new[] { "who built you?", "Who created Miu?", "who is your creator", "who leads this project", "who is Ancient Dragon?" })
+                {
+                    answer = engine.HandleAsync(question, CancellationToken.None).GetAwaiter().GetResult();
+                    check(answer.Text == LocalChat.CreatorReply && answer.Action == null && local.Calls == 1, "Creator credit is stable without model inference: " + question);
+                }
+                check(AssistantEngine.ParseCommand("who built the pyramids").Kind == "chat", "Unrelated creator questions remain general chat");
                 engine.HandleAsync("latest email", CancellationToken.None).GetAwaiter().GetResult();
                 check(local.Calls == 1, "Email commands do not enter local general chat");
                 engine.ClearConversation();

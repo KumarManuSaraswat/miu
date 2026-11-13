@@ -23,7 +23,9 @@ namespace Miu
         internal const string ModelName = "Gemma 3 1B";
         internal const long ModelBytes = 806058400;
         internal const string ModelHash = "2f8c3d137f2496dcb4019e17a50f2974b89c1be1a742db3c80cc86f91cafeeef";
-        internal const string SystemPrompt = "You are Miu, a helpful friendly assistant running offline. Give a useful, concise answer in plain English. You can analyze text supplied by the user. Do not claim to access apps or perform actions.";
+        internal const string CreatorReply = "Miu was built by a group of developers led by Ancient Dragon. My offline AI uses Google's Gemma model.";
+        internal const string CreatorPattern = @"^(?:who (?:built|made|created|developed|designed) (?:you|miu|this app)|who (?:is|are) (?:your|miu's|the) (?:creators?|developers?|makers?)|who (?:leads|runs) (?:miu|this project|the miu project)|who is ancient dragon|tell me about your (?:creator|developers?))$";
+        internal const string SystemPrompt = "You are Miu, a helpful friendly assistant running offline. " + CreatorReply + " Google made the Gemma model, not the Miu application. Give a useful, concise answer in plain English. You can analyze text supplied by the user. Do not claim to access apps or perform actions.";
         private readonly object sync = new object();
         private readonly List<Dictionary<string, string>> history = new List<Dictionary<string, string>>();
         private readonly SemaphoreSlim gate = new SemaphoreSlim(1, 1);

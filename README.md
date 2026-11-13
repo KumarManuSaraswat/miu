@@ -2,6 +2,8 @@
 
 A small companion for Windows and Android with an expressive mascot, push-to-talk voice, optional Gmail reading, and a short list of useful device commands. Each app uses its platform's native UI without an embedded browser runtime.
 
+Built by a group of developers led by **Ancient Dragon**. Miu's included offline AI uses Google's Gemma model.
+
 ![Miu's calm speaking expressions](assets/miu-speaking-preview.png)
 
 **Miu 1.0 · Windows x64 and Android 9+ ARM64 · Offline Gemma 3 included.** Download, extract or install, and chat without an account, API key, server or GPU. Original application code is MIT licensed; bundled model weights have [their own terms](docs/MODEL_TERMS.md).

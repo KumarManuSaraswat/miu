@@ -230,6 +230,7 @@ namespace Miu
             if (In(lower, "wow", "that's amazing", "that is amazing", "that's incredible", "that is incredible")) return new CommandIntent("amazed");
             if (In(lower, "tell me a joke", "make me laugh", "tell a joke")) return new CommandIntent("joke");
             if (In(lower, "who are you", "what are you", "what's your name", "what is your name")) return new CommandIntent("identity");
+            if (Regex.IsMatch(lower, LocalChat.CreatorPattern)) return new CommandIntent("creator");
             return new CommandIntent("chat", command);
         }
 
@@ -314,6 +315,7 @@ namespace Miu
                 case "amazed": return new AssistantReply("That sounds pretty amazing. Tell me more!", "amazed");
                 case "joke": lock (conversation) { emailContext = false; } return new AssistantReply("Why did the computer take a nap? It had too many tabs open. I can relate.", "playful");
                 case "identity": return new AssistantReply("I'm Miu, your small desktop companion. I can talk, check Gmail after you connect it, open a few apps, save notes, and help with everyday questions when AI chat is enabled.", "happy");
+                case "creator": return new AssistantReply(LocalChat.CreatorReply, "content");
             }
 
             // Email follow-ups are deliberately not forwarded to the chat model.
@@ -419,7 +421,7 @@ namespace Miu
                 version = conversationVersion;
             }
             contents.Add(Content("user", input));
-            string system = "You are Miu, a kind, small desktop companion. Be warm, concise and useful, usually 1-4 sentences. " +
+            string system = "You are Miu, a kind, small desktop companion. " + LocalChat.CreatorReply + " Be warm, concise and useful, usually 1-4 sentences. " +
                 "You are only a conversational model. You have no tool access, screen view, files, inbox, browser, or control of the device. " +
                 "Never claim to have performed actions, accessed emails, remembered personal data, or checked live information. " +
                 "The app separately supports explicit local commands for time/date/battery, whitelisted apps, notes, volume, web search and Gmail reading. " +

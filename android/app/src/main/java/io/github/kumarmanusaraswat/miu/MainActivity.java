@@ -842,7 +842,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     @Override
     public void heard(String value, boolean uncertain) {
         if (!active) return;
-        if (uncertain) {
+        if (uncertain && prefs.values.getBoolean("review_uncertain_speech", false)) {
             if (input != null) input.setText(value);
             state("Please check what I heard, then tap Send.", prefs.mood());
         } else submit(value);
@@ -1062,6 +1062,18 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                 "Speak replies",
                 prefs.voice(),
                 v -> prefs.values.edit().putBoolean("voice", v).apply());
+        toggle(
+                c,
+                "Review uncertain speech",
+                prefs.values.getBoolean("review_uncertain_speech", false),
+                v -> prefs.values.edit().putBoolean("review_uncertain_speech", v).apply());
+        c.addView(
+                text(
+                        "Off by default: when you finish speaking, Miu sends the recognized request"
+                            + " and answers automatically. Turn this on to check low-confidence"
+                            + " speech before sending.",
+                        12,
+                        MUTED));
         toggle(
                 c,
                 "Reduce motion",
