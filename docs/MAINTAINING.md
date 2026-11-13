@@ -16,6 +16,11 @@ This is a small project with a single initial maintainer. Keep review proportion
 | Voice | `src/SpeechService.cs`, `src/VoskSpeech.cs`, `src/PiperSpeech.cs`; microphone/synthesis coordination and short-lived native workers. |
 | Presets | `src/CommunityCatalog.cs`, `src/CommunityWindow.cs`; validated public data and explicit application of three preferences. |
 | Optional catalog service | `services/catalog`; independent read-only Worker/Neon integration, migrations, and tests. |
+| Android lifecycle and UI | `android/app/src/main/java/io/github/kumarmanusaraswat/miu/MainActivity.java`, `FloatingService.java`, `MiuTileService.java`; native UI, explicit foreground companion and lifecycle cleanup. |
+| Android local skills and motion | `CommandRouter.java`, `LocalCompanion.java`, `PhoneActions.java`, `MascotView.java`, `Motion.java` in the Android package; bounded actions, small offline responses and sparse animation bursts. |
+| Android speech and secrets | `SpeechController.java`, `SpeechChunks.java`, `Prefs.java`; on-demand platform speech, bounded queued readouts and Keystore encryption. |
+| Android screen integrations | `GmailScreenService.java`, `WhatsAppScreenService.java` and their in-memory bridges; package filters, timeouts, no screen-to-AI path, explicit WhatsApp review and one Send attempt. |
+| Android builds and checks | `android/README.md`, `android/TESTING.md`, `.github/workflows/android.yml`, `scripts/build-android-release.ps1`; separate APK signing key and release tag. |
 | Validation and releases | `tests`, `build.ps1`, `scripts/package-release.ps1`, `scripts/verify-release.ps1`, `.github/workflows`; no provider deployment is part of a desktop build. |
 
 Follow the [contributor build instructions](../CONTRIBUTING.md). The optional service has its own [setup and checks](https://github.com/KumarManuSaraswat/miu/tree/main/services/catalog). Use a separate `MIU_DATA_DIR` with synthetic data for experiments. Never use a maintainer's real mailbox, keys, or settings as test fixtures.
@@ -42,7 +47,7 @@ The catalog contains public curated presets only. Keep the runtime database role
 
 These are review priorities, not promised milestones or dates:
 
-1. Repeatable Windows installation, startup, voice cancellation, and microphone behavior across real devices.
+1. Repeatable Windows and Android installation, startup, voice cancellation, and microphone behavior across real devices. Android Gmail/WhatsApp UI compatibility needs live tests with synthetic content and explicit permission, separate from unit checks.
 2. Keyboard/navigation, screen-reader, contrast, and reduced-motion checks with actionable accessibility fixes.
 3. Clear OAuth/provider onboarding and useful offline errors without expanding account access.
 4. Dependency upkeep, release provenance, and evaluation of practical signing options.

@@ -17,3 +17,10 @@ node_modules/
 !.env.example
 *.log
 docs/TESTING.md
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+*.jks
+*.keystore
+*.p12

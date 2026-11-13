@@ -1,14 +1,24 @@
 # Miu
 
-A small Windows desktop companion with an expressive mascot, push-to-talk voice, read-only Gmail, and a short list of useful device commands. Built with native WPF rather than a browser runtime.
+A small companion for Windows and Android with an expressive mascot, push-to-talk voice, optional Gmail reading, and a short list of useful device commands. Each app uses its platform's native UI without an embedded browser runtime.
 
 ![Miu's calm speaking expressions](assets/miu-speaking-preview.png)
 
-**Version 0.1.0 preview · Windows x64 · MIT-licensed original code.** Optional connections are configured by each user. No paid subscription is required for the desktop app or local voice features.
+**Version 0.1.0 previews · Windows x64 and Android 8.0+ · MIT-licensed original code.** Optional connections are configured by each user. No paid subscription is required for the app or local commands.
 
 [Downloads](https://github.com/KumarManuSaraswat/miu/releases) · [Build status](https://github.com/KumarManuSaraswat/miu/actions/workflows/windows.yml) · [Commands](docs/COMMANDS.md) · [Support](SUPPORT.md) · [Contribute](CONTRIBUTING.md)
 
-## Start
+## Android
+
+Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/android-v0.1.0)** on a phone and open it to install. The native Android app includes 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a small offline conversation engine, a floating mascot, and the optional Neon-backed preset catalog. General AI chat is optional and uses each person's own Gemini key.
+
+Android Gmail support reads opened message bodies through optional Gmail-only accessibility access. It uses the account selected in the phone's Gmail app, without OAuth credentials or notification-preview substitution. Search and latest-message navigation depend on Gmail's interface; opening a message may mark it read. Email text stays on the phone and is excluded from AI requests. See the **[Android guide, privacy details and build instructions](android/README.md)** before enabling permissions.
+
+Optional WhatsApp access reads visible chat text and prepares explicitly requested messages for review before a single Send action. Screen integrations are experimental and depend on the installed apps' controls. See the [Android verification record](android/VERIFICATION.md) for what has and has not been tested.
+
+The remaining sections describe the **Windows** app. Its Gmail API integration and voice setup differ from Android.
+
+## Windows: start
 
 Download `miu-0.1.0-windows-x64.zip` from [Releases](https://github.com/KumarManuSaraswat/miu/releases), extract it into a writable folder, and double-click **Start Miu.cmd**. Keep its folders together. Windows with .NET Framework 4.8 is required; Windows 11 x64 is the recommended target. The executable is currently unsigned. Releases include a SHA-256 checksum file for verifying downloads.
 

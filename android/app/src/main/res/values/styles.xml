@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Miu.Base" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#7772AB</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#F8F7FB</item>
+        <item name="android:statusBarColor">#F8F7FB</item>
+        <item name="android:navigationBarColor">#292934</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+    <style name="Theme.Miu" parent="Theme.Miu.Base" />
+</resources>

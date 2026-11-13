@@ -1,8 +1,18 @@
 # Changelog
 
-## Unreleased — initial 0.1.0 release candidate
+## Android 0.1.0 preview
 
-This entry describes the prepared implementation. No public release date, download count, or production support status is implied.
+- Native Android 8.0+ app with 24 vector expressions, a gentle speaking face, tap-to-talk, local phone commands, optional floating companion and Quick Settings shortcut.
+- On-demand Android speech recognition, offline English text-to-speech, uncertainty review, cancellation and microphone cleanup when leaving the app.
+- Optional Gmail-only accessibility access for opened message bodies and best-effort Gmail search/latest-message navigation. No notification-preview substitution, mailbox credentials or email upload. Opening messages may mark them read.
+- Optional user-key Gemini chat isolated from email/notes, Keystore encryption, disabled app backups, and explicit loads from the free Neon-backed public preset catalog.
+- Offline greetings, moods, jokes, ideas and bounded arithmetic without a model/server; sparse animated blinks, glances, head motion and reaction bursts with reduced-motion support.
+- Optional WhatsApp visible-chat reading and a reviewed message flow that rechecks the recipient title/text and attempts Send only once; no Business API or AI-generated sends.
+- Separate signed APK releases, pinned Android build tooling, CI, command tests, device instrumentation, privacy disclosures and contributor instructions. Device/provider limitations are documented in the Android guide and each release's test report.
+
+## Windows 0.1.0 preview
+
+The initial Windows preview is published under tag `v0.1.0`. The Android app has a separate release tag and installation process.
 
 ### Added
 

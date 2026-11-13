@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.Miu" parent="Theme.Miu.Base">
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarColor">#F8F7FB</item>
+    </style>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/gmail_accessibility_description"
+    android:summary="@string/gmail_accessibility_summary"
+    android:packageNames="com.google.android.gm"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewScrolled"
+    android:accessibilityFeedbackType="feedbackSpoken"
+    android:accessibilityFlags="flagReportViewIds"
+    android:notificationTimeout="250"
+    android:canRetrieveWindowContent="true"
+    android:canPerformGestures="false"
+    android:isAccessibilityTool="false"
+    android:settingsActivity="io.github.kumarmanusaraswat.miu.MainActivity" />
