@@ -18,7 +18,7 @@ import android.widget.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-public final class MainActivity extends Activity implements SpeechController.Listener {
+public class MainActivity extends Activity implements SpeechController.Listener {
     static final int INK = 0xff292934, MUTED = 0xff767684, ACCENT = 0xff746d9d, BG = 0xfff8f7fb;
     private Prefs prefs;
     private SpeechController speech;
@@ -34,6 +34,12 @@ public final class MainActivity extends Activity implements SpeechController.Lis
     private String screen = "Talk";
     private boolean active, busy;
     private int networkGeneration;
+    private View assistantComposer;
+    private boolean assistantInvocationHandled;
+
+    protected boolean isAssistantSurface() {
+        return false;
+    }
 
     private static final class Message {
         final String who, text;
@@ -46,17 +52,39 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         }
     }
 
+    private static final class Retained {
+        final ArrayList<Message> messages;
+        final boolean assistantInvocationHandled;
+
+        Retained(ArrayList<Message> messages, boolean handled) {
+            this.messages = new ArrayList<>(messages);
+            this.assistantInvocationHandled = handled;
+        }
+    }
+
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        if (Build.VERSION.SDK_INT >= 30) {
+        if (forwardLegacyAssist(getIntent())) {
+            finish();
+            return;
+        }
+        if (!isAssistantSurface() && Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         prefs = new Prefs(this);
         speech = new SpeechController(this, prefs, this);
-        build();
-        if (Build.VERSION.SDK_INT >= 30)
+        Object retained = getLastNonConfigurationInstance();
+        if (retained instanceof Retained) {
+            messages.addAll(((Retained) retained).messages);
+            assistantInvocationHandled = ((Retained) retained).assistantInvocationHandled;
+        }
+        if (isAssistantSurface()) buildAssistant();
+        else build();
+        updateSecure();
+        if (!isAssistantSurface() && Build.VERSION.SDK_INT >= 30)
             root.post(() -> {
                 WindowInsetsController bars = getWindow().getInsetsController();
                 if (bars != null)
@@ -100,11 +128,11 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         b.setText(label);
         b.setTextSize(14);
         b.setAllCaps(false);
-        b.setTextColor(INK);
+        b.setTextColor(isAssistantSurface() ? 0xfff4f3f8 : INK);
         b.setMinHeight(dp(48));
         b.setMinimumHeight(dp(48));
         b.setPadding(dp(14), dp(9), dp(14), dp(9));
-        b.setBackground(shape(0xffeeedf4, 0, 16));
+        b.setBackground(shape(isAssistantSurface() ? 0xff25252e : 0xffeeedf4, 0, 16));
         b.setStateListAnimator(null);
         b.setElevation(0);
         b.setOnClickListener(v -> action.run());
@@ -154,10 +182,10 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         header.setGravity(Gravity.CENTER_VERTICAL);
         header.setPadding(0, dp(16), 0, dp(10));
         LinearLayout brand = column();
-        TextView title = text("miu", 32, INK);
+        TextView title = text("miu", 26, INK);
         title.setTypeface(Typeface.create("sans-serif-rounded", Typeface.BOLD));
         brand.addView(title);
-        brand.addView(text("A little company. A little help.", 12, MUTED));
+        brand.addView(text("Your pocket companion", 11, MUTED));
         header.addView(brand, new LinearLayout.LayoutParams(0, -2, 1));
         Button clear =
                 button(
@@ -188,10 +216,15 @@ public final class MainActivity extends Activity implements SpeechController.Lis
             nav.addView(b, p);
         }
         root.addView(nav);
-        show("Talk");
+        String destination = getIntent().getStringExtra("screen");
+        show("Looks".equals(destination) || "Settings".equals(destination) ? destination : "Talk");
     }
 
     private void show(String destination) {
+        if (isAssistantSurface()) {
+            if (!"Talk".equals(destination)) openFullApp(destination);
+            return;
+        }
         screen = destination;
         body.removeAllViews();
         mascot = null;
@@ -214,26 +247,247 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         else settings();
     }
 
+    private void buildAssistant() {
+        root = column();
+        root.setPadding(dp(22), dp(14), dp(22), dp(22));
+        root.setBackground(shape(0xff08090d, 0xff2c2d35, 30));
+        LinearLayout header = new LinearLayout(this);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        TextView brand = text("miu", 21, 0xfff4f3f8);
+        brand.setTypeface(Typeface.create("sans-serif-rounded", Typeface.BOLD));
+        header.addView(brand, new LinearLayout.LayoutParams(0, -2, 1));
+        Button full = button("Open app", () -> openFullApp("Talk"));
+        header.addView(full, new LinearLayout.LayoutParams(-2, dp(48)));
+        Button close = button("×", this::finish);
+        close.setContentDescription("Close assistant");
+        close.setTextSize(24);
+        LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(dp(48), dp(48));
+        cp.leftMargin = dp(8);
+        header.addView(close, cp);
+        root.addView(header);
+        mascot = new MascotView(this);
+        mascot.setReduced(prefs.reduced());
+        mascot.setMood(prefs.mood());
+        int size =
+                Math.min(
+                        210,
+                        (int)
+                                (getResources().getDisplayMetrics().heightPixels
+                                        / getResources().getDisplayMetrics().density
+                                        * .26f));
+        LinearLayout.LayoutParams fp = new LinearLayout.LayoutParams(dp(size), dp(size));
+        fp.gravity = Gravity.CENTER_HORIZONTAL;
+        root.addView(mascot, fp);
+        heroContainer = mascot;
+        status = text("Tap Mic when you’re ready", 13, 0xffb8b5c7);
+        status.setGravity(Gravity.CENTER);
+        status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        root.addView(status);
+        space(root, 12);
+        chatScroll = new ScrollView(this);
+        conversation = column();
+        chatScroll.addView(conversation);
+        root.addView(chatScroll, new LinearLayout.LayoutParams(-1, dp(104)));
+        renderMessages();
+        space(root, 10);
+        LinearLayout controls = new LinearLayout(this);
+        controls.setGravity(Gravity.CENTER_VERTICAL);
+        controls.addView(
+                button("Stop", this::stopTurn), new LinearLayout.LayoutParams(0, dp(52), 1));
+        Button mic = button("Mic", this::microphone);
+        mic.setId(R.id.microphone);
+        mic.setContentDescription("Start or stop listening");
+        mic.setTypeface(null, Typeface.BOLD);
+        mic.setBackground(shape(0xffc8c1e5, 0, 22));
+        mic.setTextColor(0xff17141f);
+        LinearLayout.LayoutParams mp = new LinearLayout.LayoutParams(0, dp(52), 1.5f);
+        mp.setMargins(dp(10), 0, dp(10), 0);
+        controls.addView(mic, mp);
+        controls.addView(
+                button(
+                        "Type",
+                        () -> {
+                            boolean show = assistantComposer.getVisibility() != View.VISIBLE;
+                            assistantComposer.setVisibility(show ? View.VISIBLE : View.GONE);
+                            if (show) {
+                                stopTurn();
+                                getWindow()
+                                        .setSoftInputMode(
+                                                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                                                        | WindowManager.LayoutParams
+                                                                .SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                                input.requestFocus();
+                                input.post(() -> {
+                                    if (Build.VERSION.SDK_INT >= 30
+                                            && input.getWindowInsetsController() != null)
+                                        input.getWindowInsetsController()
+                                                .show(WindowInsets.Type.ime());
+                                    else
+                                        ((InputMethodManager)
+                                                        getSystemService(INPUT_METHOD_SERVICE))
+                                                .showSoftInput(
+                                                        input, InputMethodManager.SHOW_IMPLICIT);
+                                });
+                            } else {
+                                getWindow()
+                                        .setSoftInputMode(
+                                                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                                                        | WindowManager.LayoutParams
+                                                                .SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                                ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+                                        .hideSoftInputFromWindow(input.getWindowToken(), 0);
+                            }
+                        }),
+                new LinearLayout.LayoutParams(0, dp(52), 1));
+        root.addView(controls);
+        LinearLayout composer = new LinearLayout(this);
+        composer.setGravity(Gravity.CENTER_VERTICAL);
+        composer.setPadding(0, dp(10), 0, 0);
+        assistantComposer = composer;
+        input = new EditText(this);
+        input.setId(R.id.message_input);
+        input.setSingleLine(true);
+        input.setTextSize(16);
+        input.setTextColor(0xfff4f3f8);
+        input.setHintTextColor(0xffa6a3b4);
+        input.setHint("Type a request…");
+        input.setBackground(shape(0xff202127, 0xff353640, 16));
+        input.setPadding(dp(12), dp(8), dp(8), dp(8));
+        input.setSaveEnabled(false);
+        input.setFilters(
+                new android.text.InputFilter[] {new android.text.InputFilter.LengthFilter(2000)});
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEND);
+        input.setOnEditorActionListener((v, action, event) -> {
+            if (action == android.view.inputmethod.EditorInfo.IME_ACTION_SEND) {
+                sendInput();
+                return true;
+            }
+            return false;
+        });
+        composer.addView(input, new LinearLayout.LayoutParams(0, dp(50), 1));
+        Button send = button("↑", this::sendInput);
+        send.setContentDescription("Send message");
+        composer.addView(send, new LinearLayout.LayoutParams(dp(50), dp(50)));
+        composer.setVisibility(View.GONE);
+        root.addView(composer);
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            if (Build.VERSION.SDK_INT >= 30)
+                heroContainer.setVisibility(
+                        insets.isVisible(WindowInsets.Type.ime()) ? View.GONE : View.VISIBLE);
+            return insets;
+        });
+        setContentView(root);
+        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        getWindow()
+                .setLayout(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.WRAP_CONTENT);
+        getWindow().setGravity(Gravity.BOTTOM);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        WindowManager.LayoutParams attributes = getWindow().getAttributes();
+        attributes.dimAmount = .45f;
+        getWindow().setAttributes(attributes);
+        getWindow()
+                .setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                                | WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        setFinishOnTouchOutside(true);
+    }
+
+    private void stopTurn() {
+        speech.stop();
+        networkGeneration++;
+        busy = false;
+        GmailBridge.clear();
+        WhatsAppBridge.clear();
+        state("Ready when you are", prefs.mood());
+    }
+
+    private void openFullApp(String destination) {
+        startActivity(
+                new Intent(this, MainActivity.class)
+                        .putExtra("screen", destination)
+                        .addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                        | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                        | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        if (isAssistantSurface()) finish();
+    }
+
+    private void chooseAssistant() {
+        if (Build.VERSION.SDK_INT >= 29) {
+            android.app.role.RoleManager roles =
+                    getSystemService(android.app.role.RoleManager.class);
+            if (roles != null
+                    && roles.isRoleAvailable(android.app.role.RoleManager.ROLE_ASSISTANT)) {
+                if (roles.isRoleHeld(android.app.role.RoleManager.ROLE_ASSISTANT)) {
+                    open(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
+                    return;
+                }
+                startActivityForResult(
+                        roles.createRequestRoleIntent(android.app.role.RoleManager.ROLE_ASSISTANT),
+                        31);
+                return;
+            }
+        }
+        open(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS));
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean focused) {
+        super.onWindowFocusChanged(focused);
+        if (focused) maybeStartAssistantMic();
+    }
+
+    private void maybeStartAssistantMic() {
+        if (!isAssistantSurface() || assistantInvocationHandled || !active || !hasWindowFocus())
+            return;
+        assistantInvocationHandled = true;
+        if (Intent.ACTION_ASSIST.equals(getIntent().getAction())
+                && prefs.values.getBoolean("assistant_auto_listen", false)
+                && !((KeyguardManager) getSystemService(KEYGUARD_SERVICE)).isKeyguardLocked())
+            microphone();
+    }
+
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        return new Retained(messages, assistantInvocationHandled);
+    }
+
     private void talk() {
+        boolean welcome = messages.isEmpty();
         LinearLayout hero = new LinearLayout(this);
+        hero.setOrientation(welcome ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        hero.setPadding(dp(16), dp(10), dp(16), dp(14));
+        hero.setBackground(shape(0xff121318, 0xff303139, 28));
         heroContainer = hero;
         if (getResources().getConfiguration().orientation
                 == android.content.res.Configuration.ORIENTATION_LANDSCAPE)
             hero.setVisibility(View.GONE);
-        hero.setGravity(Gravity.CENTER_VERTICAL);
+        hero.setGravity(Gravity.CENTER);
         mascot = new MascotView(this);
         mascot.setReduced(prefs.reduced());
         mascot.setMood(prefs.mood());
-        hero.addView(mascot, new LinearLayout.LayoutParams(dp(122), dp(128)));
+        int faceSize = welcome ? 164 : 96;
+        hero.addView(mascot, new LinearLayout.LayoutParams(dp(faceSize), dp(faceSize)));
         LinearLayout greeting = column();
-        TextView heading = text(messages.isEmpty() ? "Hello, you." : "I’m right here.", 24, INK);
+        greeting.setGravity(welcome ? Gravity.CENTER : Gravity.START);
+        TextView heading =
+                text(welcome ? "Hey, I’m Miu." : "I’m right here.", welcome ? 23 : 19, 0xfff4f3f8);
         heading.setTypeface(null, Typeface.BOLD);
+        heading.setGravity(welcome ? Gravity.CENTER : Gravity.START);
         greeting.addView(heading);
         space(greeting, 6);
-        status = text("Ready when you are", 13, MUTED);
+        status = text("Ready when you are", 12, 0xffb8b6c4);
+        status.setGravity(welcome ? Gravity.CENTER : Gravity.START);
         status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         greeting.addView(status);
-        hero.addView(greeting, new LinearLayout.LayoutParams(0, -2, 1));
+        hero.addView(
+                greeting,
+                welcome
+                        ? new LinearLayout.LayoutParams(-1, -2)
+                        : new LinearLayout.LayoutParams(0, -2, 1));
         body.addView(hero);
         chatScroll = new ScrollView(this);
         chatScroll.setFillViewport(true);
@@ -302,10 +556,9 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         body.addView(composer);
         TextView local =
                 text(
-                        "LOCAL COMPANION  ·  "
-                                + (prefs.values.getBoolean("cloud", false)
-                                        ? "AI CHAT ENABLED"
-                                        : "NO ACCOUNT NEEDED"),
+                        prefs.values.getBoolean("cloud", false)
+                                ? "Optional cloud conversation is on"
+                                : "Everyday help, right on your phone",
                         10,
                         MUTED);
         local.setPadding(dp(3), dp(10), 0, 0);
@@ -315,13 +568,35 @@ public final class MainActivity extends Activity implements SpeechController.Lis
     private void renderMessages() {
         if (conversation == null) return;
         conversation.removeAllViews();
+        if (isAssistantSurface()) {
+            chatScroll.getLayoutParams().height = dp(messages.isEmpty() ? 48 : 104);
+            chatScroll.requestLayout();
+            if (messages.isEmpty()) {
+                TextView hint = text("A little help, right here.", 17, 0xffe6e4ee);
+                hint.setGravity(Gravity.CENTER);
+                conversation.addView(hint);
+            } else {
+                int start = Math.max(0, messages.size() - 2);
+                for (int i = start; i < messages.size(); i++) {
+                    Message m = messages.get(i);
+                    TextView line =
+                            text(
+                                    m.text,
+                                    m.who.equals("YOU") ? 13 : 16,
+                                    m.who.equals("YOU") ? 0xffa6a3b4 : 0xfff4f3f8);
+                    line.setPadding(dp(4), dp(4), dp(4), dp(8));
+                    line.setTextIsSelectable(false);
+                    conversation.addView(line);
+                }
+            }
+            return;
+        }
         if (messages.isEmpty()) {
-            TextView prompt = text("Small things, made easier.", 19, INK);
+            TextView prompt = text("Start with a small task", 17, INK);
             prompt.setTypeface(null, Typeface.BOLD);
             conversation.addView(prompt);
             space(conversation, 7);
-            conversation.addView(text("Speak naturally, or start with one of these.", 14, MUTED));
-            space(conversation, 18);
+            space(conversation, 8);
             for (String sample :
                     new String[] {
                         "What time is it?", "Read the latest email", "What can you do?"
@@ -363,7 +638,8 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         messages.add(new Message(who, value, sensitive));
         while (messages.size() > 24) messages.remove(0);
         updateSecure();
-        renderMessages();
+        if (!isAssistantSurface() && messages.size() == 1 && "Talk".equals(screen)) show("Talk");
+        else renderMessages();
     }
 
     private void updateSecure() {
@@ -391,6 +667,11 @@ public final class MainActivity extends Activity implements SpeechController.Lis
 
     void submit(String value) {
         if (value == null || value.trim().isEmpty()) return;
+        if (isAssistantSurface()
+                && ((KeyguardManager) getSystemService(KEYGUARD_SERVICE)).isKeyguardLocked()) {
+            state("Unlock your phone to talk with Miu.", "idle");
+            return;
+        }
         if (!screen.equals("Talk")) show("Talk");
         speech.stop();
         networkGeneration++;
@@ -467,6 +748,11 @@ public final class MainActivity extends Activity implements SpeechController.Lis
     }
 
     private void microphone() {
+        if (isAssistantSurface()
+                && ((KeyguardManager) getSystemService(KEYGUARD_SERVICE)).isKeyguardLocked()) {
+            state("Unlock your phone to use the microphone.", "idle");
+            return;
+        }
         if (speech.isListening()) {
             speech.stop();
             state("Listening stopped", prefs.mood());
@@ -552,7 +838,7 @@ public final class MainActivity extends Activity implements SpeechController.Lis
                         : c.kind == CommandRouter.Kind.GMAIL_LATEST
                                 ? GmailBridge.Mode.LATEST
                                 : GmailBridge.Mode.SEARCH;
-        GmailBridge.start(mode, c.argument);
+        GmailBridge.start(mode, c.argument, isAssistantSurface());
         state("Opening Gmail for this request…", "thinking");
         try {
             startActivity(intent);
@@ -707,6 +993,43 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         c.addView(title);
         space(c, 6);
         c.addView(text("Useful on its own. Extra access is always your choice.", 14, MUTED));
+        section(c, "Miu as your phone assistant");
+        c.addView(
+                text(
+                        "Open a small black panel with Miu’s animated face over your current app.",
+                        14,
+                        MUTED));
+        space(c, 8);
+        c.addView(
+                button(
+                        "Preview assistant",
+                        () ->
+                                startActivity(
+                                        new Intent(this, AssistantActivity.class)
+                                                .setAction(Intent.ACTION_ASSIST))));
+        space(c, 8);
+        c.addView(button("Use Miu as phone assistant", this::chooseAssistant));
+        space(c, 8);
+        c.addView(
+                text(
+                        "Choose Miu in Android’s assistant picker. Your phone controls which"
+                                + " shortcut opens it: a long power-button press, Home gesture or"
+                                + " another assistant gesture. A short power press still locks the"
+                                + " phone.",
+                        13,
+                        MUTED));
+        toggle(
+                c,
+                "Listen when assistant opens",
+                prefs.values.getBoolean("assistant_auto_listen", false),
+                v -> prefs.values.edit().putBoolean("assistant_auto_listen", v).apply());
+        c.addView(
+                text(
+                        "Optional: starts one microphone turn when the assistant panel opens,"
+                                + " including from shortcuts. Off by default; otherwise tap Mic. No"
+                                + " background listener or wake word.",
+                        12,
+                        MUTED));
         section(c, "Voice & motion");
         toggle(
                 c,
@@ -1077,7 +1400,8 @@ public final class MainActivity extends Activity implements SpeechController.Lis
         WhatsAppBridge.start(
                 draft == null ? WhatsAppBridge.Mode.READ : WhatsAppBridge.Mode.PREVIEW,
                 draft,
-                null);
+                null,
+                isAssistantSurface());
         launchWhatsApp(draft);
     }
 
@@ -1112,38 +1436,69 @@ public final class MainActivity extends Activity implements SpeechController.Lis
                         + "\n\n"
                         + "Check that this is the intended chat. Send will hand this message to"
                         + " WhatsApp once.";
-        new AlertDialog.Builder(this)
-                .setTitle("Send this WhatsApp message?")
-                .setMessage(details)
-                .setPositiveButton(
-                        "Send message",
-                        (d, w) -> {
-                            if (android.os.SystemClock.elapsedRealtime() - result.created > 60000) {
-                                reply(
-                                        "That review expired. Ask again so I can recheck the chat.",
-                                        false);
-                                return;
-                            }
-                            WhatsAppBridge.start(
-                                    WhatsAppBridge.Mode.SEND, result.draft, result.recipient);
-                            launchWhatsApp(result.draft);
-                        })
-                .setNegativeButton(
-                        "Cancel",
-                        (d, w) -> {
-                            WhatsAppBridge.clear();
-                            state("Message canceled. Nothing was sent.", prefs.mood());
-                        })
-                .setOnCancelListener(d -> WhatsAppBridge.clear())
-                .show();
+        AlertDialog review =
+                new AlertDialog.Builder(this)
+                        .setTitle("Send this WhatsApp message?")
+                        .setMessage(details)
+                        .setPositiveButton(
+                                "Send message",
+                                (d, w) -> {
+                                    if (android.os.SystemClock.elapsedRealtime() - result.created
+                                            > 60000) {
+                                        reply(
+                                                "That review expired. Ask again so I can recheck"
+                                                        + " the chat.",
+                                                false);
+                                        return;
+                                    }
+                                    WhatsAppBridge.start(
+                                            WhatsAppBridge.Mode.SEND,
+                                            result.draft,
+                                            result.recipient,
+                                            isAssistantSurface());
+                                    launchWhatsApp(result.draft);
+                                })
+                        .setNegativeButton(
+                                "Cancel",
+                                (d, w) -> {
+                                    WhatsAppBridge.clear();
+                                    state("Message canceled. Nothing was sent.", prefs.mood());
+                                })
+                        .setOnCancelListener(d -> WhatsAppBridge.clear())
+                        .create();
+        if (review.getWindow() != null)
+            review.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        review.show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (speech == null) return;
         active = true;
         speech.setActive(true);
         if (screen.equals("Settings")) show("Settings");
+        receiveScreenResults();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (forwardLegacyAssist(intent)) return;
+        setIntent(intent);
+        String destination = intent.getStringExtra("screen");
+        if (!isAssistantSurface()
+                && ("Talk".equals(destination)
+                        || "Looks".equals(destination)
+                        || "Settings".equals(destination))) show(destination);
+        if (active) receiveScreenResults();
+        if (isAssistantSurface() && Intent.ACTION_ASSIST.equals(intent.getAction())) {
+            assistantInvocationHandled = false;
+            root.post(this::maybeStartAssistantMic);
+        }
+    }
+
+    private void receiveScreenResults() {
         GmailBridge.Result result = GmailBridge.take();
         if (result != null) {
             show("Talk");
@@ -1160,16 +1515,31 @@ public final class MainActivity extends Activity implements SpeechController.Lis
     @Override
     protected void onPause() {
         active = false;
-        speech.setActive(false);
+        if (speech != null) speech.setActive(false);
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
+        if (isAssistantSurface() && isFinishing()) {
+            GmailBridge.clear();
+            WhatsAppBridge.clear();
+        }
         networkGeneration++;
-        speech.destroy();
+        if (speech != null) speech.destroy();
         worker.shutdownNow();
         messages.clear();
         super.onDestroy();
+    }
+
+    private boolean forwardLegacyAssist(Intent intent) {
+        // Android can retain the original assistant component across app updates.
+        // Never forward context extras or treat a launcher tap as an assistant request.
+        if (isAssistantSurface() || !Intent.ACTION_ASSIST.equals(intent.getAction())) return false;
+        startActivity(
+                new Intent(this, AssistantActivity.class)
+                        .setAction(Intent.ACTION_ASSIST)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        return true;
     }
 }

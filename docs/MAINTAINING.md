@@ -16,7 +16,7 @@ This is a small project with a single initial maintainer. Keep review proportion
 | Voice | `src/SpeechService.cs`, `src/VoskSpeech.cs`, `src/PiperSpeech.cs`; microphone/synthesis coordination and short-lived native workers. |
 | Presets | `src/CommunityCatalog.cs`, `src/CommunityWindow.cs`; validated public data and explicit application of three preferences. |
 | Optional catalog service | `services/catalog`; independent read-only Worker/Neon integration, migrations, and tests. |
-| Android lifecycle and UI | `android/app/src/main/java/io/github/kumarmanusaraswat/miu/MainActivity.java`, `FloatingService.java`, `MiuTileService.java`; native UI, explicit foreground companion and lifecycle cleanup. |
+| Android lifecycle and UI | `android/app/src/main/java/io/github/kumarmanusaraswat/miu/MainActivity.java`, `AssistantActivity.java`, `FloatingService.java`, `MiuTileService.java`; full app and compact assistant, legacy assist routing, explicit foreground companion and lifecycle cleanup. |
 | Android local skills and motion | `CommandRouter.java`, `LocalCompanion.java`, `PhoneActions.java`, `MascotView.java`, `Motion.java` in the Android package; bounded actions, small offline responses and sparse animation bursts. |
 | Android speech and secrets | `SpeechController.java`, `SpeechChunks.java`, `Prefs.java`; on-demand platform speech, bounded queued readouts and Keystore encryption. |
 | Android screen integrations | `GmailScreenService.java`, `WhatsAppScreenService.java` and their in-memory bridges; package filters, timeouts, no screen-to-AI path, explicit WhatsApp review and one Send attempt. |

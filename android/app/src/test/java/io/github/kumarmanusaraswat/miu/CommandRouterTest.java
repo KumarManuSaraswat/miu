@@ -5,6 +5,18 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class CommandRouterTest {
+    @Test
+    public void understandsItsNameWithoutChangingMessageBodies() {
+        assertEquals(CommandRouter.Kind.GREETING, CommandRouter.parse("Hi Miu!").kind);
+        assertEquals(CommandRouter.Kind.GREETING, CommandRouter.parse("Hello, Miu").kind);
+        assertEquals(
+                CommandRouter.Kind.TIME, CommandRouter.parse("Hey Miu, what time is it?").kind);
+        assertEquals("Hello, Miu!", CommandRouter.parse("Miu, note Hello, Miu!").argument);
+        assertEquals(
+                "send WhatsApp message saying Hi Miu!",
+                CommandRouter.parse("Miu, send WhatsApp message saying Hi Miu!").argument);
+    }
+
     private void kind(CommandRouter.Kind expected, String... examples) {
         for (String text : examples) assertEquals(text, expected, CommandRouter.parse(text).kind);
     }

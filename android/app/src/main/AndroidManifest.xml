@@ -37,6 +37,11 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name=".AssistantActivity" android:exported="true"
+            android:theme="@style/Theme.Miu.Assistant" android:launchMode="singleTop"
+            android:taskAffinity="${applicationId}.assistant" android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.ASSIST" />
                 <category android:name="android.intent.category.DEFAULT" />
