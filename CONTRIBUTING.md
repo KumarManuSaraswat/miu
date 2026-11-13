@@ -1,8 +1,12 @@
 # Contributing to Miu
 
-Miu is an early Windows desktop companion. Contributions should make its small set of tasks more reliable, understandable, and economical to run. The local command assistant must remain usable without a paid account.
+Miu is an early native companion for Windows and Android. Contributions should make its small set of tasks more reliable, understandable, and economical to run. The local command assistant must remain usable without a paid account.
 
 ## Build locally
+
+For **Android**, follow [android/README.md](android/README.md#build-from-source) and [device testing](android/TESTING.md). It uses Java 17 source, Android SDK 36 and the pinned Gradle wrapper, with no third-party runtime libraries. Android source lives under `android/`; credentials use Android Keystore. Gmail access is an optional bounded accessibility workflow, not the Windows Gmail API: it cannot send or delete mail, but opening a message may mark it read. Document actual phone and provider coverage; do not equate a compiled APK with a microphone or Gmail integration test.
+
+The following build instructions are for **Windows**.
 
 Use Windows x64 with .NET Framework 4.8; Windows 11 is the primary target. Run **Windows PowerShell 5.1** (`powershell.exe`, not `pwsh`). The desktop build uses the compiler included with .NET Framework; no npm, NuGet, Python, or .NET SDK installation is required. Source must remain compatible with **C# 5**. The optional catalog service has a separate Node.js toolchain described in its [README](https://github.com/KumarManuSaraswat/miu/tree/main/services/catalog).
 
@@ -35,9 +39,9 @@ Fork the repository, create a focused branch, and submit a pull request against 
 
 - Idle operation must not keep a microphone, neural model, browser runtime, or polling loop running unnecessarily. Report app memory and temporary worker memory separately.
 - Device actions must come from explicit, bounded commands. Model replies, email bodies, web content, and imported documents are data, not permission to run commands.
-- Gmail is read-only. Keep its fetched message data out of the optional cloud conversation path.
+- Gmail supports reading only. Keep message data out of the optional cloud conversation path. Android's screen workflow can mark opened messages read, as its disclosure explains; it must never compose, send, delete or archive.
 - Cloud conversation is optional and disabled by default. Adding another provider requires clear data-flow documentation and a current check of that provider's eligibility and billing terms.
-- Credentials use the existing Windows user-scoped protected store. Never add a bundled API key, shared refresh token, personal OAuth JSON, or credential logging.
+- Credentials use the platform's protected store: Windows user-scoped DPAPI or Android Keystore. Never add a bundled API key, shared refresh token, personal OAuth JSON, signing keystore, or credential logging.
 - Add timeouts, cancellation, and resource cleanup when introducing network requests or child processes.
 
 Add or update focused checks when a behavior, boundary, or bug warrants them. Appearance-only changes normally need a rendered visual check rather than tests that mirror the drawing code. Tests should use synthetic data and avoid real Gmail, cloud keys, microphone access, audio playback, or device mutations unless explicitly run as a manual integration check.

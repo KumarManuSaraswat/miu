@@ -1,6 +1,6 @@
 # Miu privacy notice
 
-Last reviewed: **12 November 2026**. This notice describes the 0.1.0 desktop implementation and lean distribution. It does not assert approval by Google or another provider.
+Last reviewed: **13 November 2026**. The tables below describe the 0.1.0 **Windows desktop** implementation and lean distribution. The native Android app has different speech, storage and Gmail access mechanisms, documented in the **[Android privacy and permission notice](android/README.md#android-privacy-and-permissions)**. Neither implementation asserts approval by Google or another provider.
 
 Miu has no project-operated user-account server, analytics service, or automatic crash upload. Local commands work without a cloud account. Optional Gmail and Gemini features communicate directly with Google when used; optional voice setup downloads files from their upstream hosts. The optional community catalog is described below and has no shared hosted address configured by default.
 

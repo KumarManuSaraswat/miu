@@ -1,0 +1,4 @@
+<resources>
+    <item name="message_input" type="id" />
+    <item name="microphone" type="id" />
+</resources>

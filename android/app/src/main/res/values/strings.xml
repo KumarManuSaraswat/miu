@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Miu</string>
+    <string name="gmail_accessibility_description">Miu reads accessible text inside the Gmail app only after you ask it to read an email. It can use Gmail’s search box and open a matching message. It cannot send, delete, archive, or modify messages. Reading a message in Gmail may mark it as read. Message text stays in memory on your phone and is never sent to Miu’s AI or preset service. Access is inactive between your requests. Disable this service at any time in Accessibility settings.</string>
+    <string name="gmail_accessibility_summary">Read an opened Gmail message aloud, only when you ask Miu.</string>
+    <string name="whatsapp_access_description">Only when you ask, Miu reads text messages visible in your open WhatsApp chat. To send, it first shows the displayed chat name and your exact message in Miu for confirmation, then checks the same chat and text before one Send action. It never sends from AI output or received messages, overwrites an existing draft, retries Send, monitors chats, opens attachments, or deletes messages. Opening a chat can mark messages read. Chat text stays in phone memory and is never sent to AI or the preset catalog. Disable this optional access anytime.</string>
+    <string name="whatsapp_access_summary">Read the open chat on request; send only your reviewed message.</string>
+</resources>

@@ -1,0 +1,45 @@
+plugins { id 'com.android.application' }
+
+android {
+    enableKotlin = false // Java-only app: omit Kotlin tasks and its automatic standard library.
+    namespace 'io.github.kumarmanusaraswat.miu'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'io.github.kumarmanusaraswat.miu'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '0.1.0'
+        testInstrumentationRunner 'io.github.kumarmanusaraswat.miu.MiuInstrumentation'
+    }
+    signingConfigs {
+        if (System.getenv('MIU_KEYSTORE_PATH')) {
+            release {
+                storeFile file(System.getenv('MIU_KEYSTORE_PATH'))
+                storePassword System.getenv('MIU_STORE_PASSWORD')
+                keyAlias 'miu-android'
+                keyPassword System.getenv('MIU_STORE_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix '.dev'
+            versionNameSuffix '-dev'
+        }
+        release {
+            if (System.getenv('MIU_KEYSTORE_PATH')) signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildFeatures { buildConfig true }
+    lint { abortOnError true; checkReleaseBuilds true }
+}
+
+dependencies { testImplementation 'junit:junit:4.13.2' }

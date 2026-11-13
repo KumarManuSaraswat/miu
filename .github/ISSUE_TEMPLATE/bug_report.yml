@@ -15,10 +15,10 @@ body:
     validations:
       required: true
   - type: input
-    id: windows
+    id: platform
     attributes:
-      label: Windows version
-      description: Include Windows 10/11 and the build if known.
+      label: Operating system and device
+      description: Include Windows version/build or Android version/phone model. Do not include device serial numbers.
     validations:
       required: true
   - type: textarea
@@ -40,11 +40,12 @@ body:
     attributes:
       label: Affected feature
       options:
-        - Desktop interface or reactions
+        - Interface, animation or floating mascot
         - Local command
         - Microphone recognition
         - Spoken reply
         - Gmail setup or lookup
+        - WhatsApp screen reading or message review
         - Optional Gemini conversation
         - Companion presets or optional catalog
         - Build or packaging
