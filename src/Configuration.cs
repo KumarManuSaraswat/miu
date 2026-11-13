@@ -82,6 +82,7 @@ namespace Miu
         public bool VoiceEnabled = true;
         public bool NaturalVoiceEnabled = true;
         public bool CloudEnabled = false;
+        public bool LocalAiEnabled = true;
         public bool ReducedMotion = false;
         public bool AlwaysOnTop = true;
         public bool AutoListen = false;
@@ -107,6 +108,7 @@ namespace Miu
                 result.VoiceEnabled = Json.Text(data, "voice", "True") == "True";
                 result.NaturalVoiceEnabled = Json.Text(data, "naturalVoice", "True") == "True";
                 result.CloudEnabled = Json.Text(data, "cloud", "False") == "True";
+                result.LocalAiEnabled = Json.Text(data, "localAi", "True") == "True";
                 result.ReducedMotion = Json.Text(data, "reducedMotion", "False") == "True";
                 result.AlwaysOnTop = Json.Text(data, "alwaysOnTop", "True") == "True";
                 result.GeminiModel = MigrateGeminiModel(Json.Text(data, "model", result.GeminiModel));
@@ -135,7 +137,7 @@ namespace Miu
         {
             var data = new Dictionary<string, object> { { "voice", VoiceEnabled }, { "naturalVoice", NaturalVoiceEnabled }, { "cloud", CloudEnabled }, { "reducedMotion", ReducedMotion },
                 { "alwaysOnTop", AlwaysOnTop }, { "model", GeminiModel }, { "speechRate", SpeechRate }, { "left", MascotLeft }, { "top", MascotTop },
-                { "catalogUrl", CatalogUrl }, { "preferredMood", PreferredMood } };
+                { "catalogUrl", CatalogUrl }, { "preferredMood", PreferredMood }, { "localAi", LocalAiEnabled } };
             string file = Path.Combine(AppPaths.DataDirectory, "settings.json");
             File.WriteAllText(file + ".tmp", Json.Stringify(data));
             if (File.Exists(file)) File.Replace(file + ".tmp", file, null); else File.Move(file + ".tmp", file);

@@ -23,6 +23,13 @@ The runner must report `Miu device checks passed`. Add `-r` for raw output with 
 
 ## Manual release checks
 
+For the offline-AI bundle, first run `scripts/prepare-local-ai.ps1 -Platform android`,
+build with `-PwithLocalAi`, then add `-e model true` before the instrumentation runner
+name. This exercises first model preparation, a real answer and follow-up, Stop,
+clock routing afterward, compact-panel inference and process cleanup when closing
+the panel. It uses synthetic chat only. Ordinary small CI APKs intentionally omit
+the weights. Check the final signed APK separately before distributing it.
+
 - Install the signed release APK; launch, rotate, reopen, and check text at a larger system font size.
 - Try typed time/date/battery, notes, an installed app, a timer, and cancellation.
 - Grant microphone access through Android, say “what time is it,” and verify both recognition and audible speech. Deny permission and verify typing still works. Leave Miu mid-listening and confirm recording stops.

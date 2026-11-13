@@ -560,7 +560,10 @@ final class SpeechController implements RecognitionListener {
         ArrayList<String> words = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         float[] confidence = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
         cancelListening();
-        if (words == null || words.isEmpty()) {
+        if (words == null
+                || words.isEmpty()
+                || words.get(0) == null
+                || words.get(0).trim().isEmpty()) {
             listener.state("No speech recognized. Try again or type below.", "idle");
             return;
         }

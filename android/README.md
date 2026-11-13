@@ -2,19 +2,19 @@
 
 A small, native Android companion with a soft monochrome mascot, 24 animated expressions, tap-to-talk, local phone commands, optional Gmail reading, and reviewed WhatsApp messaging. No embedded browser, subscription, resident language model, or Miu account is required.
 
-Miu is designed to stay useful in your pocket without a server. Its small offline conversation engine handles greetings, a few moods, company, jokes, ideas and simple arithmetic alongside device skills. This is a deliberately bounded assistant, not a local general-purpose language model. It does not pretend to know answers outside its skills. Optional cloud conversation adds broader answers, but removing that connection does not disable the companion.
+Miu is designed to stay useful in your pocket without a server. Its small offline conversation engine handles greetings, a few moods, company, jokes, ideas and simple arithmetic alongside device skills. Gemma 3 1B handles general conversation locally after the built-in skills. Its small model can make mistakes; it runs only for a reply and never controls device actions.
 
-**Android 8.0+ · Java / Android framework · MIT · 0.1.0 preview**
+**Android 9+ ARM64 · Miu 1.0 · MIT app code; separate Gemma model terms**
 
 <p><img src="../assets/miu-android-home.png" width="260" alt="Miu Android home with its animated mascot and local task shortcuts"> <img src="../assets/miu-android-assistant.png" width="260" alt="Compact black Miu assistant panel over the app"></p>
 
 ## Install and share
 
-Download **miu-0.1.0-android.apk** from the [Android release](https://github.com/KumarManuSaraswat/miu/releases/tag/android-v0.1.0) directly on your phone. Open it and approve installation from the browser or file manager you used. You can turn that installer permission off afterward. The APK is signed by the Miu project; updates must use the same signing certificate. No Play Store purchase is required.
+Download **miu-1.0.0-android.apk** from the [Android release](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0) directly on your phone. Open it and approve installation from the browser or file manager you used. You can turn that installer permission off afterward. The APK is signed by the Miu project; updates must use the same signing certificate. No Play Store purchase is required.
 
 Share the release link or the APK itself. Each person grants their own optional permissions and supplies their own AI key if they want cloud conversation. There are no maintainer credentials in the download. Verify the APK against the release's `SHA256SUMS.txt` if needed.
 
-This is an early Android release, not a claim of compatibility with every phone or Google Play approval. Do not bypass Play Protect, enterprise restrictions, or permissions you do not understand. See [testing and release checks](TESTING.md).
+Compatibility has been checked on the documented test phone, not every Android device; this is not Google Play approval. Do not bypass Play Protect, enterprise restrictions, or permissions you do not understand. See [testing and release checks](TESTING.md).
 
 ## First conversation
 
@@ -22,7 +22,7 @@ This is an early Android release, not a claim of compatibility with every phone 
 2. Wait for **Listening**, say **“what time is it”**, then pause.
 3. Tap **Stop** to interrupt, or type into the message box.
 
-Miu prefers Android's on-device recognizer. Availability also depends on installed English language packs. If the phone exposes only a system speech provider, Miu explains that it may process audio online and asks before using it. Recognition exists only during a requested turn; there is no wake-word listener or background recording. Uncertain recognition is shown for review instead of executing a command.
+Miu prefers Android's on-device recognizer. Availability also depends on installed English language packs. If the phone exposes only a system speech provider, Miu explains that it may process audio online and asks before using it. Recognition exists only during a requested turn; there is no wake-word listener or background recording. When you finish speaking, the final recognized request submits automatically in Talk and the compact assistant. **Settings → Review uncertain speech** optionally puts low-confidence results in the composer for review; it is off by default. WhatsApp's separate send review still applies.
 
 On Android 13+, Miu checks installed language packs and chooses an available English variant, preferring the phone's English locale. If none is installed, use **Settings → Check offline English → Download offline English** while connected, preferably to Wi-Fi. Android's provider controls the model's size, download schedule and support; some providers require downloading through the system's speech settings instead. An initial language download is separate from recording or sending your voice. The companion remains usable by typing while setup is incomplete.
 
@@ -68,7 +68,7 @@ The most reliable workflow is to open an email in Gmail, return to Miu, and say 
 
 Opening a message can **mark it as read in Gmail**. Miu cannot send, archive, delete, or edit email. It does not click email links, download attachments, or expand hidden content automatically. Images, collapsed messages, quoted threads, inaccessible text, and very long messages may be incomplete. A request reads at most six screen segments and 12,000 characters within 30 seconds. Long readouts are queued in bounded voice chunks rather than cut off at the speech engine's single-utterance limit. It stops reading on lock and does nothing between requests. It does not monitor new mail in the background.
 
-Email results stay in process memory. They are never passed to Gemini or Neon, never put in an Intent, and never written to a transcript. **Clear** removes the current conversation and pending Gmail result. Email-containing conversation screens use Android's secure-window flag to prevent ordinary screenshots and recent-app previews. Clearing references is not a guarantee of forensic erasure; Android controls its own system facilities.
+Email results stay in process memory. They are never passed to Gemma, Gemini or Neon, never put in an Intent, and never written to a transcript. **Clear** removes the current conversation and pending Gmail result. Email-containing conversation screens use Android's secure-window flag to prevent ordinary screenshots and recent-app previews. Clearing references is not a guarantee of forensic erasure; Android controls its own system facilities.
 
 ## WhatsApp on the screen
 
@@ -104,7 +104,7 @@ The face blinks and looks around at rest, changes its eyes, mouth and head motio
 
 ## Optional Gemini and Neon
 
-Local commands, voice, reactions and Gmail screen reading need no AI key. For general conversation, enter your own Gemini API key in Settings, save it, and explicitly enable AI chat. Only your current chat message is sent to Google's Gemini API. No prior conversation, Gmail result, notes file, device context, or screen data is included. Manually typing private information into general chat can still send that text to Google.
+Local commands, voice, reactions and Gmail screen reading need no AI key. Gemma 3 offline chat is enabled by default and included in the APK. Allow about 3 GB free space for installation/preparation and use a phone with 4 GB RAM or more. See [offline AI measurements and limits](../docs/OFFLINE_AI.md) and [model terms](../docs/MODEL_TERMS.md). To select optional Gemini instead, turn Offline AI off, enter your own Gemini key, and explicitly enable cloud chat. Only your current chat message is sent to Google's Gemini API. No prior conversation, Gmail result, notes file, device context, or screen data is included. Manually typing private information into general chat can still send that text to Google.
 
 The default model is `gemini-3.5-flash-lite`; it can be changed in Settings as provider availability changes. Free quotas, eligibility, region and provider terms apply. Keep billing disabled for a zero-cost account. Miu does not enable billing or verify your billing status. Review [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing) and [terms](https://ai.google.dev/gemini-api/terms).
 

@@ -1,12 +1,32 @@
 # Preparing and releasing Miu
 
-The initial release line is **0.1.x**, a Windows x64 preview. The release repository is [KumarManuSaraswat/miu](https://github.com/KumarManuSaraswat/miu). The commands below use version **0.1.0**; update all version inputs consistently for a later release. Preparing local ZIP files does not publish a release, configure a signing identity, enable a sponsor profile, or complete a provider's review. The [maintainer guide](MAINTAINING.md) covers routine reviews and dependency changes.
+The **1.0.0** release bundles offline AI on Windows x64 and Android ARM64. Keep source version, Android version code, tag and tested binaries aligned; reuse the existing Android signing key for updates. Preparing artifacts does not publish them.
+
+## Ready-to-use release
+
+```powershell
+./scripts/prepare-local-ai.ps1 -Platform all
+./scripts/prepare-windows-speech.ps1
+./build.ps1 -Test
+./scripts/package-ready-release.ps1 -Version 1.0.0
+./scripts/build-android-release.ps1 -Version 1.0.0
+```
+
+The Android step needs the SDK/JDK and `MIU_KEYSTORE_PATH` / `MIU_STORE_PASSWORD` supplied privately. Never commit or log signing secrets. It runs unit/lint checks, verifies the embedded model hash and notices, and verifies the signed APK. Windows packaging streams its large ZIP and verifies every entry. It uses the public document allowlist and pinned `windows-bundle.sha256` inputs; user settings and installed voice directories are not sources. Change that reviewed manifest only when intentionally changing dependencies.
+
+Run model-enabled Android instrumentation (`-e model true`) with `-PwithLocalAi`, then test the signed APK. Test the extracted Windows bundle, including real inference and cancellation. Preserve measurements and distinguish automated checks from owner-confirmed microphone/accessibility behavior. One device does not establish broad compatibility or battery performance.
+
+Publish the ready Windows ZIP, signed APK, clean source ZIP, signing-certificate fingerprint and consolidated SHA-256 list under **v1.0.0** after checks pass. CI's lean Windows ZIP must not replace the end-user download. Keep speech source archives and license notices in the bundle. The 806 MB model is excluded from Git.
+
+## Lean source/CI packaging
+
+The commands below validate source/build inputs without downloading models. Their source ZIP is suitable for publication; their lean Windows ZIP is a CI artifact, not the ready-to-use release.
 
 ## Distribution policy
 
-The source package contains Miu's original source, tests, build/release scripts, documentation, project assets, and the optional community-catalog service. The portable package contains the app, its recognition-worker wrapper, launch script, documentation, and optional voice download scripts. Deploying the catalog service is a separate maintainer operation; its source is not included in the portable app ZIP.
+The source package contains Miu's original source, tests, build/release scripts, documentation, project assets, and the optional community-catalog service. The lean CI portable package contains the app, its recognition-worker wrapper, launch script, documentation, and optional voice download scripts. Deploying the catalog service is a separate maintainer operation; its source is not included in the portable app ZIP.
 
-**Neither release package contains downloaded Vosk/Piper engines, native dependency DLLs, or voice models.** Windows and .NET Framework are prerequisites, not redistributed project files. The optional setup scripts download upstream voice components after the user chooses to install them.
+**Lean CI/source packages omit model and speech runtime binaries.** The end-user Windows bundle includes them through `package-ready-release.ps1`, with licenses and speech sources. Windows and .NET Framework are prerequisites, not redistributed project files. Developers can use the optional setup scripts to obtain speech components separately.
 
 The [MIT License](../LICENSE) applies to Miu's original contributions. It does not relicense upstream software or models. In particular, the optional older Piper native archive includes components with different licenses, including the eSpeak NG GPL component; the archive is not an MIT-only bundle. See [THIRD_PARTY.md](THIRD_PARTY.md). Do not add downloaded voice folders to a release ZIP without first reviewing the exact versions' license notices, redistribution and source requirements. A separate process or download script is not, by itself, a legal conclusion about every combination of software.
 
@@ -16,19 +36,19 @@ Run these from a clean project root on Windows x64 with .NET Framework 4.8 and *
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Test
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-release.ps1 -Version 0.1.0
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-release.ps1 -Version 0.1.0
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-release.ps1 -Version 1.0.0
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-release.ps1 -Version 1.0.0
 ```
 
-The packager uses already-built binaries and an explicit file allowlist. It validates its output and refuses to overwrite a populated release directory. For a second review build, pass the same new `-OutputDirectory`, such as `artifacts\releases\0.1.0-review2`, to both packaging and verification commands.
+The packager uses already-built binaries and an explicit file allowlist. It validates its output and refuses to overwrite a populated release directory. For a second review build, pass the same new `-OutputDirectory`, such as `artifacts\releases\1.0.0-review2`, to both packaging and verification commands.
 
 The voice installer's offline guards can be checked with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-voice.ps1 -SelfTest`. Its `-CheckCache` option inventories existing cached archives without installing or downloading. A normal install stages files, preserves upstream archive contents, validates the model when the worker is available, and retains a previous installation in `.cache/voice` before replacement. These guard checks do not prove a fresh network download or a real microphone works; test those separately when changing the installer.
 
-Expected output under `artifacts\releases\0.1.0`:
+Expected output under `artifacts\releases\1.0.0`:
 
 ```text
-miu-0.1.0-source.zip
-miu-0.1.0-windows-x64.zip
+miu-1.0.0-source.zip
+miu-1.0.0-windows-x64.zip
 SHA256SUMS.txt
 ```
 
@@ -63,6 +83,6 @@ Keep cloud chat optional and disabled by default. Do not market Miu as universal
 
 The optional Neon/Cloudflare catalog also needs a separately reviewed deployment: configure its read-only database access, check current free-plan limits, publish the operator's relevant notice, and test its actual endpoint. Do not embed database credentials in the desktop app or treat a local mock as proof of live service operation. No shared service address is configured by this release preparation.
 
-Upload only reviewed artifacts after confirming the target repository, source commit, release notes, and account settings. Publish checksums with the release, download the assets again and verify their hashes, and link the matching source commit and build evidence. Mark a preview release accurately and describe outstanding manual checks. These archives are unsigned; their checksums establish integrity, not publisher identity.
+Upload only reviewed artifacts after confirming the target repository, source commit, release notes, and account settings. Publish checksums with the release, download the assets again and verify their hashes, and link the matching source commit and build evidence. Mark a preview release accurately and describe outstanding manual checks. The Windows executable is unsigned. Android APKs use the retained project signing key; checksums establish file integrity, not independent trust in the publisher.
 
 Neon eligibility and an application draft are in [NEON_SPONSORSHIP.md](NEON_SPONSORSHIP.md). Repository publication does not automatically enable GitHub Sponsors, guarantee a sponsorship, or authorize a sponsor badge.

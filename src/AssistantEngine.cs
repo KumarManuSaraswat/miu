@@ -42,6 +42,7 @@ namespace Miu
         private readonly Func<string, int, CancellationToken, Task<List<MailMessage>>> searchMail;
         private readonly Func<string, CancellationToken, Task<MailMessage>> readMail;
         private readonly AppSettings settings;
+        private readonly ILocalChat localChat;
         private readonly HttpClient http;
         private readonly SemaphoreSlim gate = new SemaphoreSlim(1, 1);
         private readonly List<Dictionary<string, object>> conversation = new List<Dictionary<string, object>>();
@@ -58,17 +59,19 @@ namespace Miu
             searchMail = gmail.SearchAsync;
             readMail = gmail.ReadAsync;
             this.settings = settings;
+            localChat = new LocalChat();
             http = CreateChatClient();
         }
 
         // Offline tests can control completion order without opening a mailbox or profile.
         internal AssistantEngine(AppSettings settings, Func<bool> gmailConnected,
             Func<string, int, CancellationToken, Task<List<MailMessage>>> searchMail,
-            Func<string, CancellationToken, Task<MailMessage>> readMail)
+            Func<string, CancellationToken, Task<MailMessage>> readMail, ILocalChat localChat = null)
         {
             if (settings == null || gmailConnected == null || searchMail == null || readMail == null)
                 throw new ArgumentNullException("Mail operation dependencies");
             this.settings = settings; this.gmailConnected = gmailConnected;
+            this.localChat = localChat;
             this.searchMail = searchMail; this.readMail = readMail;
             http = CreateChatClient();
         }
@@ -81,6 +84,7 @@ namespace Miu
 
         public void ClearConversation()
         {
+            if (localChat != null) localChat.Clear();
             lock (conversation)
             {
                 conversation.Clear(); conversationVersion++;
@@ -226,6 +230,7 @@ namespace Miu
             if (In(lower, "wow", "that's amazing", "that is amazing", "that's incredible", "that is incredible")) return new CommandIntent("amazed");
             if (In(lower, "tell me a joke", "make me laugh", "tell a joke")) return new CommandIntent("joke");
             if (In(lower, "who are you", "what are you", "what's your name", "what is your name")) return new CommandIntent("identity");
+            if (Regex.IsMatch(lower, LocalChat.CreatorPattern)) return new CommandIntent("creator");
             return new CommandIntent("chat", command);
         }
 
@@ -310,17 +315,24 @@ namespace Miu
                 case "amazed": return new AssistantReply("That sounds pretty amazing. Tell me more!", "amazed");
                 case "joke": lock (conversation) { emailContext = false; } return new AssistantReply("Why did the computer take a nap? It had too many tabs open. I can relate.", "playful");
                 case "identity": return new AssistantReply("I'm Miu, your small desktop companion. I can talk, check Gmail after you connect it, open a few apps, save notes, and help with everyday questions when AI chat is enabled.", "happy");
+                case "creator": return new AssistantReply(LocalChat.CreatorReply, "content");
             }
 
             // Email follow-ups are deliberately not forwarded to the chat model.
             lock (conversation)
             {
                 if (emailContext && Regex.IsMatch(intent.Argument, @"\b(?:it|that|those|these|this|sender|subject|message|summari[sz]e|reply)\b", RegexOptions.IgnoreCase))
-                    return new AssistantReply("I keep email content out of cloud chat. You can ask me to read an email or search Gmail, or start a new topic with 'clear chat'.", "curious", null, true);
+                    return new AssistantReply("I keep email content out of general AI chat. You can ask me to read an email or search Gmail, or start a new topic with 'clear chat'.", "curious", null, true);
                 emailContext = false;
             }
+            if (settings.LocalAiEnabled)
+            {
+                if (localChat != null && localChat.IsAvailable)
+                    return new AssistantReply(await localChat.ReplyAsync(intent.Argument, ct).ConfigureAwait(false), "happy");
+                return new AssistantReply("The offline model is missing from this build. Extract the complete Miu download, including its models and local-ai folders. My device commands still work.", "curious");
+            }
             if (!settings.CloudEnabled || String.IsNullOrWhiteSpace(settings.GeminiApiKey))
-                return new AssistantReply("My free local commands are ready. For open-ended conversation, enable optional AI chat in Settings with your own free-tier Gemini key. For now, ask 'help' to see what I can do.", "curious");
+                return new AssistantReply("My local commands are ready. The complete Miu download also includes offline AI for conversation; enable it in Settings. Ask 'help' to see the device commands.", "curious");
             return await ChatAsync(intent.Argument, ct).ConfigureAwait(false);
         }
 
@@ -409,7 +421,7 @@ namespace Miu
                 version = conversationVersion;
             }
             contents.Add(Content("user", input));
-            string system = "You are Miu, a kind, small desktop companion. Be warm, concise and useful, usually 1-4 sentences. " +
+            string system = "You are Miu, a kind, small desktop companion. " + LocalChat.CreatorReply + " Be warm, concise and useful, usually 1-4 sentences. " +
                 "You are only a conversational model. You have no tool access, screen view, files, inbox, browser, or control of the device. " +
                 "Never claim to have performed actions, accessed emails, remembered personal data, or checked live information. " +
                 "The app separately supports explicit local commands for time/date/battery, whitelisted apps, notes, volume, web search and Gmail reading. " +
@@ -629,6 +641,7 @@ namespace Miu
             if (disposed) return;
             disposed = true;
             ClearConversation();
+            if (localChat != null) localChat.Dispose();
             http.Dispose();
             // Do not dispose gate here: a request cancelled by shutdown can still
             // reach its finally block and release it safely.

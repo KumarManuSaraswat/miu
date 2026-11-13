@@ -1,0 +1,24 @@
+Miu's application source is licensed under the MIT License in the repository root.
+
+Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms
+
+The bundled Gemma 3 1B instruction-tuned Q4_K_M model is developed by Google,
+quantized and distributed through Ollama's public model registry. Miu redistributes
+the model file unchanged. It is not a model trained or owned by the Miu project.
+
+Use and redistribution of the bundled Gemma model are governed by GEMMA-TERMS.txt
+and GEMMA-PROHIBITED-USE.txt, including all use restrictions in section 3.2. These
+restrictions are incorporated into the terms governing use and redistribution of
+Miu's bundled model. They do not replace the MIT license for Miu's application code.
+GEMMA-DISTRIBUTOR-TERMS.txt preserves the notice supplied with this exact model file.
+
+The native CPU inference runtime is llama.cpp, commit
+cd959bae99ff4bed22bef2604f45241c09bbb8c8, released as b12110.
+Copyright (c) 2023-2026 The ggml authors. See LLAMA-CPP-LICENSE.txt and the
+accompanying dependency license files. Source: https://github.com/ggml-org/llama.cpp
+
+Model origin: https://ollama.com/library/gemma3:1b
+Model SHA-256: 2f8c3d137f2496dcb4019e17a50f2974b89c1be1a742db3c80cc86f91cafeeef
+Model size: 806058400 bytes.
+
+No endorsement by Google, Ollama or the llama.cpp authors is implied.

@@ -8,8 +8,8 @@ android {
         applicationId 'io.github.kumarmanusaraswat.miu'
         minSdk 26
         targetSdk 36
-        versionCode 1
-        versionName '0.1.0'
+        versionCode 2
+        versionName '1.0.0'
         testInstrumentationRunner 'io.github.kumarmanusaraswat.miu.MiuInstrumentation'
     }
     signingConfigs {
@@ -39,7 +39,23 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     buildFeatures { buildConfig true }
+    sourceSets.main.assets.srcDirs += [layout.buildDirectory.dir('generated/legal-assets')]
+    // The public ready-to-use APK opts into verified build inputs. Plain source
+    // builds stay small for command/UI tests and never download a model silently.
+    if (providers.gradleProperty('withLocalAi').isPresent()) {
+        defaultConfig.minSdk = 28 // Pinned native runtime's minimum Android API.
+        defaultConfig.ndk.abiFilters.add('arm64-v8a')
+        sourceSets.main.jniLibs.srcDirs += [rootProject.file('../.cache/local-ai/android/jniLibs')]
+        sourceSets.main.assets.srcDirs += [rootProject.file('../.cache/local-ai/android/assets')]
+        packaging.jniLibs.useLegacyPackaging = true
+    }
     lint { abortOnError true; checkReleaseBuilds true }
 }
+
+tasks.register('copyModelNotices', Copy) {
+    from(rootProject.file('../licenses')) { include '*.txt' }
+    into(layout.buildDirectory.dir('generated/legal-assets/legal'))
+}
+tasks.named('preBuild').configure { dependsOn('copyModelNotices') }
 
 dependencies { testImplementation 'junit:junit:4.13.2' }

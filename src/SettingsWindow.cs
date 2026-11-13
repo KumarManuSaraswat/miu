@@ -13,7 +13,7 @@ namespace Miu
     {
         private readonly AppController app;
         private readonly TextBlock gmailStatus, voiceStatus, notice;
-        private readonly CheckBox voice, naturalVoice, cloud, motion, onTop, freeTier;
+        private readonly CheckBox voice, naturalVoice, cloud, localAi, motion, onTop, freeTier;
         private readonly PasswordBox key;
         private readonly TextBox model, googleSignInLink;
         private readonly Slider rate;
@@ -80,8 +80,12 @@ namespace Miu
             googleSignIn = new Expander { Header = "Google sign-in link", Content = linkPanel, Margin = new Thickness(0, 4, 0, 0), Visibility = Visibility.Collapsed };
             signInRecovery.Children.Add(googleSignIn); panel.Children.Add(signInRecovery);
             var privacy = Skin.Text("Mail is fetched only when asked and is never passed to the chat model. Sign-in tokens are encrypted for your Windows account.", 11, Skin.Muted); privacy.Margin = new Thickness(0, 9, 0, 20); panel.Children.Add(privacy);
-            Section(panel, "More conversation · optional");
-            panel.Children.Add(Skin.Text("Built-in commands work without a key. For open-ended conversation, connect your own Gemini free-tier key. Your chat text goes to Google; email results stay local.", 12, Skin.Muted));
+            Section(panel, "Offline AI");
+            localAi = Check(panel, "Use the included Gemma 3 model", app.Settings.LocalAiEnabled);
+            panel.Children.Add(Skin.Text("Chat runs on this laptop with no account or API key. The model uses about 1 GB of memory while answering, then unloads. Replies can be mistaken; check important facts.", 12, Skin.Muted));
+            var modelTerms = Skin.Button("Model terms and credits", delegate { OpenGuide("MODEL_TERMS.md"); }); modelTerms.Margin = new Thickness(0, 8, 0, 18); panel.Children.Add(modelTerms);
+            Section(panel, "Cloud conversation · optional");
+            panel.Children.Add(Skin.Text("Used only when you turn offline AI off. Connecting Gemini sends your chat text to Google; email results stay local.", 12, Skin.Muted));
             cloud = Check(panel, "Enable Gemini conversation", app.Settings.CloudEnabled);
             panel.Children.Add(Skin.Text("Gemini API key", 11, Skin.Muted));
             key = new PasswordBox { Password = app.Settings.GeminiApiKey, Padding = new Thickness(10), Margin = new Thickness(0, 5, 0, 9), BorderBrush = Skin.Line, BorderThickness = new Thickness(1) }; panel.Children.Add(key);
@@ -124,6 +128,7 @@ namespace Miu
             {
                 app.Settings.GeminiApiKey = key.Password;
                 app.Settings.VoiceEnabled = voice.IsChecked == true; app.Settings.CloudEnabled = cloud.IsChecked == true;
+                app.Settings.LocalAiEnabled = localAi.IsChecked == true;
                 app.Settings.NaturalVoiceEnabled = naturalVoice.IsChecked == true;
                 app.Settings.ReducedMotion = motion.IsChecked == true; app.Settings.AlwaysOnTop = onTop.IsChecked == true;
                 app.Settings.SpeechRate = (int)rate.Value; app.Settings.GeminiModel = model.Text.Trim();

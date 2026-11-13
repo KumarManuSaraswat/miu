@@ -55,3 +55,7 @@ Miu's original source and documentation use the [MIT License](LICENSE). Submit o
 For new icons, models, illustrations, or other assets, document their origin and license. Do not copy another product's branding, distribute an unlicensed reference image, or describe Miu as affiliated with a provider without authorization. Public identity and visual provenance checks are part of the [release process](docs/RELEASE.md).
 
 The project currently has no promised review turnaround, paid support agreement, or contributor reward scheme.
+
+## Offline model changes
+
+Read [the offline AI guide](docs/OFFLINE_AI.md) before changing inference. Keep model output separate from device execution, preserve explicit cloud selection and cancellation, and record measured memory and latency. Large model/runtime binaries belong in release assets, not Git. Model licenses are separate from Miu's MIT source. The ready package is built from checksum-pinned inputs; update the manifest only after reviewing the new files.
