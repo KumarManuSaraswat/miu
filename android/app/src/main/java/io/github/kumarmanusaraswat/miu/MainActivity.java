@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     private ScrollView chatScroll;
     private final ArrayList<Message> messages = new ArrayList<>();
     private String screen = "Talk";
+    private String responseMood = "idle";
     private boolean active, busy;
     private int networkGeneration;
     private View assistantComposer;
@@ -56,10 +57,12 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     private static final class Retained {
         final ArrayList<Message> messages;
         final boolean assistantInvocationHandled;
+        final String responseMood;
 
-        Retained(ArrayList<Message> messages, boolean handled) {
+        Retained(ArrayList<Message> messages, boolean handled, String mood) {
             this.messages = new ArrayList<>(messages);
             this.assistantInvocationHandled = handled;
+            this.responseMood = mood;
         }
     }
 
@@ -76,12 +79,14 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         prefs = new Prefs(this);
+        responseMood = prefs.mood();
         speech = new SpeechController(this, prefs, this);
         localChat = new LocalChat(this);
         Object retained = getLastNonConfigurationInstance();
         if (retained instanceof Retained) {
             messages.addAll(((Retained) retained).messages);
             assistantInvocationHandled = ((Retained) retained).assistantInvocationHandled;
+            responseMood = ((Retained) retained).responseMood;
         }
         if (isAssistantSurface()) buildAssistant();
         else build();
@@ -200,6 +205,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                             GmailBridge.clear();
                             WhatsAppBridge.clear();
                             messages.clear();
+                            responseMood = prefs.mood();
                             updateSecure();
                             show("Talk");
                         });
@@ -270,7 +276,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         root.addView(header);
         mascot = new MascotView(this);
         mascot.setReduced(prefs.reduced());
-        mascot.setMood(prefs.mood());
+        mascot.setMood(responseMood);
         int size =
                 Math.min(
                         210,
@@ -405,7 +411,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         busy = false;
         GmailBridge.clear();
         WhatsAppBridge.clear();
-        state("Ready when you are", prefs.mood());
+        state("Ready when you are", "idle");
     }
 
     private void openFullApp(String destination) {
@@ -456,7 +462,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
 
     @Override
     public Object onRetainNonConfigurationInstance() {
-        return new Retained(messages, assistantInvocationHandled);
+        return new Retained(messages, assistantInvocationHandled, responseMood);
     }
 
     private void talk() {
@@ -472,7 +478,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         hero.setGravity(Gravity.CENTER);
         mascot = new MascotView(this);
         mascot.setReduced(prefs.reduced());
-        mascot.setMood(prefs.mood());
+        mascot.setMood(responseMood);
         int faceSize = welcome ? 164 : 96;
         hero.addView(mascot, new LinearLayout.LayoutParams(dp(faceSize), dp(faceSize)));
         LinearLayout greeting = column();
@@ -511,7 +517,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                             busy = false;
                             GmailBridge.clear();
                             WhatsAppBridge.clear();
-                            state("Stopped · ready when you are", prefs.mood());
+                            state("Stopped · ready when you are", "idle");
                         });
         actions.addView(stop);
         TextView hint = text("Tap the mic, then speak", 12, MUTED);
@@ -656,8 +662,13 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     }
 
     private void reply(String value, boolean sensitive) {
+        reply(value, sensitive, prefs.mood());
+    }
+
+    private void reply(String value, boolean sensitive, String mood) {
+        responseMood = Expressions.resolve(mood) == null ? "content" : mood;
         add("MIU", value, sensitive);
-        state("Ready when you are", prefs.mood());
+        state("Ready when you are", "idle");
         if (active) speech.speak(value);
     }
 
@@ -694,7 +705,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         if (c.kind == CommandRouter.Kind.STOP) {
             GmailBridge.clear();
-            state("Stopped", prefs.mood());
+            state("Stopped", "idle");
             return;
         }
         if (c.kind == CommandRouter.Kind.GMAIL_READ
@@ -723,8 +734,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         LocalCompanion.Reply company = companion.answer(c.argument);
         if (company != null) {
-            reply(company.text, false);
-            if (mascot != null) mascot.setMood(company.mood);
+            reply(company.text, false, company.mood);
             return;
         }
         final boolean offline = prefs.values.getBoolean("local_ai", true);
@@ -743,7 +753,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         busy = true;
         state(offline ? "Starting offline AI…" : "Thinking online…", "thinking");
         worker.execute(() -> {
-            String answer;
+            ConversationReply answer;
             try {
                 answer =
                         offline
@@ -755,19 +765,22 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                                                             && generation == networkGeneration)
                                                         state(progress, "thinking");
                                                 }))
-                                : Network.chat(c.argument, prefs);
+                                : ConversationReply.fromText(
+                                        c.argument, Network.chat(c.argument, prefs));
             } catch (Exception ex) {
                 answer =
-                        ex instanceof java.io.IOException
-                                ? ex.getMessage()
-                                : "I couldn’t get a reply. Check the key, model, and connection in"
-                                        + " Settings.";
+                        new ConversationReply(
+                                ex instanceof java.io.IOException
+                                        ? ex.getMessage()
+                                        : "I couldn’t get a reply. Check the key, model, and"
+                                              + " connection in Settings.",
+                                "curious");
             }
-            final String result = answer;
+            final ConversationReply result = answer;
             runOnUiThread(() -> {
                 if (isDestroyed() || generation != networkGeneration) return;
                 busy = false;
-                reply(result, false);
+                reply(result.text, false, result.mood);
             });
         });
     }
@@ -780,7 +793,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         if (speech.isListening()) {
             speech.stop();
-            state("Listening stopped", prefs.mood());
+            state("Listening stopped", "idle");
             return;
         }
         if (!speech.available()) {
@@ -836,7 +849,10 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     @Override
     public void state(String message, String mood) {
         if (status != null) status.setText(message);
-        if (mascot != null) mascot.setMood(mood.equals("idle") ? prefs.mood() : mood);
+        if (mascot != null) {
+            mascot.setMood(mood.equals("idle") || mood.equals("speaking") ? responseMood : mood);
+            mascot.setTalking(mood.equals("speaking"));
+        }
     }
 
     @Override
@@ -844,7 +860,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         if (!active) return;
         if (uncertain && prefs.values.getBoolean("review_uncertain_speech", false)) {
             if (input != null) input.setText(value);
-            state("Please check what I heard, then tap Send.", prefs.mood());
+            state("Please check what I heard, then tap Send.", "idle");
         } else submit(value);
     }
 
@@ -910,7 +926,8 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         space(content, 6);
         content.addView(
                 text(
-                        "Choose Miu’s resting expression. Speaking stays soft and simple.",
+                        "Choose Miu’s resting expression. During offline chat, reactions follow the"
+                            + " conversation.",
                         14,
                         MUTED));
         space(content, 20);
@@ -935,6 +952,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                 tile.setFocusable(true);
                 tile.setOnClickListener(v -> {
                     prefs.values.edit().putString("mood", mood).apply();
+                    responseMood = mood;
                     show("Looks");
                 });
                 LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, -2, 1);
@@ -981,6 +999,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                                                         .putInt("rate", preset.rate)
                                                         .putBoolean("reduced", preset.reduced)
                                                         .apply();
+                                                responseMood = preset.mood;
                                                 Toast.makeText(
                                                                 this,
                                                                 preset.name + " applied",
@@ -1531,7 +1550,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         if (speech == null) return;
         active = true;
         speech.setActive(true);
-        if (!busy) state("Ready when you are", prefs.mood());
+        if (!busy) state("Ready when you are", "idle");
         if (screen.equals("Settings")) show("Settings");
         receiveScreenResults();
     }
@@ -1615,6 +1634,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         networkGeneration++;
         busy = false;
         if (speech != null) speech.setActive(false);
+        if (mascot != null) mascot.setTalking(false);
         super.onPause();
     }
 

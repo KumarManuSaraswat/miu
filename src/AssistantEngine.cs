@@ -328,7 +328,10 @@ namespace Miu
             if (settings.LocalAiEnabled)
             {
                 if (localChat != null && localChat.IsAvailable)
-                    return new AssistantReply(await localChat.ReplyAsync(intent.Argument, ct).ConfigureAwait(false), "happy");
+                {
+                    ConversationReply reply = await localChat.ReplyAsync(intent.Argument, ct).ConfigureAwait(false);
+                    return new AssistantReply(reply.Text, reply.Mood);
+                }
                 return new AssistantReply("The offline model is missing from this build. Extract the complete Miu download, including its models and local-ai folders. My device commands still work.", "curious");
             }
             if (!settings.CloudEnabled || String.IsNullOrWhiteSpace(settings.GeminiApiKey))

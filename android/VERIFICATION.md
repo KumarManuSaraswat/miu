@@ -1,5 +1,22 @@
 # Android verification record
 
+## 1.0.1 reaction fix — 13 November 2026
+
+The model-enabled development build passed **93 device checks** on the same
+Android 16 ARM64 phone. The new checks exercise real Gemma replies with sad,
+celebratory and informational messages, then simulate speech-start and
+speech-finish callbacks to verify that Talk and the compact assistant retain the
+response's expression while toggling mouth animation. No real microphone audio,
+email, WhatsApp messages or cloud services were used for these checks.
+
+The signed version 1.0.1 / version code 3 APK was built with the existing signing
+key. Debug unit tests (including 18 matched Windows/Android text-reaction cases)
+and release lint passed. These text-cue rules are not a general sentiment model;
+nuance, sarcasm and unfamiliar wording can produce a calm fallback expression.
+
+The signed 1.0.1 update was installed on the test phone. Its owner then confirmed
+that the face changes with the reply and continues animating during speech.
+
 ## 1.0 offline model checks — 13 November 2026
 
 The model-enabled development APK passed **75 device checks** on the same Android

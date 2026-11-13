@@ -1,4 +1,4 @@
-param([ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '1.0.0', [string]$OutputDirectory = 'artifacts/ready/1.0.0')
+param([ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '1.0.1', [string]$OutputDirectory = 'artifacts/ready/1.0.1')
 $ErrorActionPreference = 'Stop'
 $selectedVersion = $Version; $selectedOutput = $OutputDirectory
 . (Join-Path $PSScriptRoot 'verify-release.ps1') -DefinitionsOnly

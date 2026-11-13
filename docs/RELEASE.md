@@ -1,6 +1,6 @@
 # Preparing and releasing Miu
 
-The **1.0.0** release bundles offline AI on Windows x64 and Android ARM64. Keep source version, Android version code, tag and tested binaries aligned; reuse the existing Android signing key for updates. Preparing artifacts does not publish them.
+The **1.0.1** release bundles offline AI on Windows x64 and Android ARM64. Keep source version, Android version code, tag and tested binaries aligned; reuse the existing Android signing key for updates. Preparing artifacts does not publish them.
 
 ## Ready-to-use release
 
@@ -8,15 +8,15 @@ The **1.0.0** release bundles offline AI on Windows x64 and Android ARM64. Keep 
 ./scripts/prepare-local-ai.ps1 -Platform all
 ./scripts/prepare-windows-speech.ps1
 ./build.ps1 -Test
-./scripts/package-ready-release.ps1 -Version 1.0.0
-./scripts/build-android-release.ps1 -Version 1.0.0
+./scripts/package-ready-release.ps1 -Version 1.0.1
+./scripts/build-android-release.ps1 -Version 1.0.1
 ```
 
 The Android step needs the SDK/JDK and `MIU_KEYSTORE_PATH` / `MIU_STORE_PASSWORD` supplied privately. Never commit or log signing secrets. It runs unit/lint checks, verifies the embedded model hash and notices, and verifies the signed APK. Windows packaging streams its large ZIP and verifies every entry. It uses the public document allowlist and pinned `windows-bundle.sha256` inputs; user settings and installed voice directories are not sources. Change that reviewed manifest only when intentionally changing dependencies.
 
 Run model-enabled Android instrumentation (`-e model true`) with `-PwithLocalAi`, then test the signed APK. Test the extracted Windows bundle, including real inference and cancellation. Preserve measurements and distinguish automated checks from owner-confirmed microphone/accessibility behavior. One device does not establish broad compatibility or battery performance.
 
-Publish the ready Windows ZIP, signed APK, clean source ZIP, signing-certificate fingerprint and consolidated SHA-256 list under **v1.0.0** after checks pass. CI's lean Windows ZIP must not replace the end-user download. Keep speech source archives and license notices in the bundle. The 806 MB model is excluded from Git.
+Publish the ready Windows ZIP, signed APK, clean source ZIP, signing-certificate fingerprint and consolidated SHA-256 list under **v1.0.1** after checks pass. CI's lean Windows ZIP must not replace the end-user download. Keep speech source archives and license notices in the bundle. The 806 MB model is excluded from Git.
 
 ## Lean source/CI packaging
 
@@ -36,19 +36,19 @@ Run these from a clean project root on Windows x64 with .NET Framework 4.8 and *
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -Test
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-release.ps1 -Version 1.0.0
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-release.ps1 -Version 1.0.0
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-release.ps1 -Version 1.0.1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-release.ps1 -Version 1.0.1
 ```
 
-The packager uses already-built binaries and an explicit file allowlist. It validates its output and refuses to overwrite a populated release directory. For a second review build, pass the same new `-OutputDirectory`, such as `artifacts\releases\1.0.0-review2`, to both packaging and verification commands.
+The packager uses already-built binaries and an explicit file allowlist. It validates its output and refuses to overwrite a populated release directory. For a second review build, pass the same new `-OutputDirectory`, such as `artifacts\releases\1.0.1-review2`, to both packaging and verification commands.
 
 The voice installer's offline guards can be checked with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-voice.ps1 -SelfTest`. Its `-CheckCache` option inventories existing cached archives without installing or downloading. A normal install stages files, preserves upstream archive contents, validates the model when the worker is available, and retains a previous installation in `.cache/voice` before replacement. These guard checks do not prove a fresh network download or a real microphone works; test those separately when changing the installer.
 
-Expected output under `artifacts\releases\1.0.0`:
+Expected output under `artifacts\releases\1.0.1`:
 
 ```text
-miu-1.0.0-source.zip
-miu-1.0.0-windows-x64.zip
+miu-1.0.1-source.zip
+miu-1.0.1-windows-x64.zip
 SHA256SUMS.txt
 ```
 

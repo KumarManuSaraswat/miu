@@ -17,6 +17,7 @@ public final class MascotView extends View {
     private final HashMap<String, Path> paths = new HashMap<>();
     private String mood = "idle";
     private boolean reduced;
+    private boolean talking;
     private int frame;
     private long origin = android.os.SystemClock.uptimeMillis(), reactionStart = origin;
     private final Runnable animate =
@@ -40,7 +41,9 @@ public final class MascotView extends View {
 
     public void setMood(String value) {
         String resolved = Expressions.resolve(value);
-        mood = resolved == null ? "idle" : resolved;
+        String next = resolved == null ? "idle" : resolved;
+        if (mood.equals(next)) return;
+        mood = next;
         reactionStart = android.os.SystemClock.uptimeMillis();
         setContentDescription("Miu: " + Expressions.label(mood));
         removeCallbacks(animate);
@@ -52,6 +55,17 @@ public final class MascotView extends View {
         return mood;
     }
 
+    public void setTalking(boolean value) {
+        if (talking == value) return;
+        talking = value;
+        scheduleMotion();
+        invalidate();
+    }
+
+    public boolean isTalking() {
+        return talking;
+    }
+
     @Override
     public boolean performClick() {
         return super.performClick();
@@ -59,11 +73,15 @@ public final class MascotView extends View {
 
     public void setReduced(boolean value) {
         reduced = value;
-        setMood(mood);
+        scheduleMotion();
+        invalidate();
     }
 
     private boolean animated() {
-        return mood.equals("speaking") || mood.equals("listening") || mood.equals("thinking");
+        return talking
+                || mood.equals("speaking")
+                || mood.equals("listening")
+                || mood.equals("thinking");
     }
 
     private boolean canMove() {
@@ -250,12 +268,19 @@ public final class MascotView extends View {
             c.translate(0, 4 * reaction);
         accents(c, face);
         c.restore();
-        if (mood.equals("speaking")) {
+        boolean speaking = talking || mood.equals("speaking");
+        if (speaking
+                && (face.equals("cheerful")
+                        || face.equals("idle")
+                        || face.equals("content")
+                        || face.equals("neutral"))) {
             float h = moving ? 2 + (float) Math.abs(Math.sin(now / 110.0)) * 4.5f : 3;
             eye(c, 94, 117, 12, h);
         } else {
             c.save();
             c.scale(1 + .12f * reaction, 1 + .16f * reaction, 94, 117);
+            if (speaking && moving)
+                c.scale(1, .75f + .25f * (float) Math.sin(now / 110.0), 94, 117);
             mouth(c, face);
             c.restore();
         }

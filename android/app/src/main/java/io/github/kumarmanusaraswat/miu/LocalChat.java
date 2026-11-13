@@ -78,7 +78,7 @@ final class LocalChat implements AutoCloseable {
         }
     }
 
-    String reply(String message, Progress progress) throws Exception {
+    ConversationReply reply(String message, Progress progress) throws Exception {
         if (message.length() > 1200)
             throw new IOException(
                     "Please keep this question under 1,200 characters for the small offline"
@@ -203,7 +203,7 @@ final class LocalChat implements AutoCloseable {
                                 .put("miu", escapeTokens(clip(answer, 400))));
                 while (history.size() > 2) history.remove(0);
             }
-            return answer;
+            return ConversationReply.fromText(message, answer);
         } finally {
             deadline.shutdownNow();
             child.destroyForcibly();

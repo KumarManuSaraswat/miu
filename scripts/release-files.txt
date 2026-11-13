@@ -14,6 +14,7 @@ android/app/src/androidTest/java/io/github/kumarmanusaraswat/miu/MiuInstrumentat
 android/app/src/main/AndroidManifest.xml
 android/app/src/main/java/io/github/kumarmanusaraswat/miu/AssistantActivity.java
 android/app/src/main/java/io/github/kumarmanusaraswat/miu/CommandRouter.java
+android/app/src/main/java/io/github/kumarmanusaraswat/miu/ConversationReply.java
 android/app/src/main/java/io/github/kumarmanusaraswat/miu/EnglishLanguages.java
 android/app/src/main/java/io/github/kumarmanusaraswat/miu/Expressions.java
 android/app/src/main/java/io/github/kumarmanusaraswat/miu/FloatingService.java
@@ -43,6 +44,7 @@ android/app/src/main/res/xml/data_extraction_rules.xml
 android/app/src/main/res/xml/gmail_accessibility.xml
 android/app/src/main/res/xml/whatsapp_accessibility.xml
 android/app/src/test/java/io/github/kumarmanusaraswat/miu/CommandRouterTest.java
+android/app/src/test/java/io/github/kumarmanusaraswat/miu/ConversationReplyTest.java
 android/app/src/test/java/io/github/kumarmanusaraswat/miu/EnglishLanguagesTest.java
 android/app/src/test/java/io/github/kumarmanusaraswat/miu/LocalChatTest.java
 android/app/src/test/java/io/github/kumarmanusaraswat/miu/LocalCompanionTest.java
@@ -151,6 +153,7 @@ src/ChatWindow.cs
 src/CommunityCatalog.cs
 src/CommunityWindow.cs
 src/Configuration.cs
+src/ConversationReply.cs
 src/DeviceActions.cs
 src/ExpressionCatalog.cs
 src/GmailService.cs
