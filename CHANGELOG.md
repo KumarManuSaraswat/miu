@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0 — offline companion
+
+- Included Gemma 3 1B Q4_K_M for Android ARM64 and Windows x64: no account, GPU or inference server required.
+- Bounded in-memory conversation, local model integrity checks, cancellation and process unloading between replies.
+- Local commands remain independent of model output; no automatic cloud fallback.
+- Android prepares its included model with progress, and keeps the animated compact assistant panel.
+- Model provenance, separate Gemma terms, measured resource requirements and reproducible bundle inputs.
+
+
 ## Android 0.1.0 preview
 
 - Refreshed Talk, Looks and Settings UI, plus a compact black assistant panel with animated reactions, typing, tap-to-talk and optional listening on invocation. Handles Android's saved assistant target from earlier previews without opening the full app.

@@ -14,6 +14,7 @@ public final class MiuInstrumentation extends Instrumentation {
     private int checks;
     private MainActivity activity;
     private boolean online;
+    private boolean modelChecks;
 
     private void check(boolean condition, String reason) {
         if (!condition) throw new AssertionError(reason);
@@ -24,6 +25,7 @@ public final class MiuInstrumentation extends Instrumentation {
     public void onCreate(Bundle args) {
         super.onCreate(args);
         online = args != null && "true".equals(args.getString("online"));
+        modelChecks = args != null && "true".equals(args.getString("model"));
         start();
     }
 
@@ -290,6 +292,7 @@ public final class MiuInstrumentation extends Instrumentation {
                 runOnMainSync(forwarded::finish);
                 waitForIdleSync();
             }
+            if (modelChecks) runModelChecks();
             result.putString(
                     "stream",
                     "Miu device checks passed: " + checks + "; live catalog=" + online + "\n");
@@ -310,6 +313,87 @@ public final class MiuInstrumentation extends Instrumentation {
                     .putBoolean("assistant_auto_listen", assistantAutoListen)
                     .apply();
         }
+    }
+
+    private void runModelChecks() throws Exception {
+        activity =
+                (MainActivity)
+                        startActivitySync(
+                                new Intent(getTargetContext(), MainActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        waitForIdleSync();
+        java.lang.reflect.Field field = MainActivity.class.getDeclaredField("localChat");
+        field.setAccessible(true);
+        LocalChat engine = (LocalChat) field.get(activity);
+        check(engine.packaged(), "Ready-to-use build is missing its model/runtime");
+        runOnMainSync(() -> activity.submit("What is the capital city of France? Answer briefly."));
+        check(
+                awaitText("Paris", 120000),
+                "Bundled model did not answer the first offline question");
+        check(!engine.running(), "Model process retained after first answer");
+        runOnMainSync(() -> activity.submit("Which country is that city in?"));
+        check(awaitText("France", 90000), "Model follow-up lost recent conversation");
+        runOnMainSync(() ->
+                activity.submit("Write a very long story about a robot exploring a new planet."));
+        long until = android.os.SystemClock.elapsedRealtime() + 12000;
+        while (!engine.running() && android.os.SystemClock.elapsedRealtime() < until)
+            Thread.sleep(100);
+        check(engine.running(), "Cancellation test did not start the model process");
+        runOnMainSync(() -> activity.submit("stop"));
+        until = android.os.SystemClock.elapsedRealtime() + 5000;
+        while (engine.running() && android.os.SystemClock.elapsedRealtime() < until)
+            Thread.sleep(100);
+        check(!engine.running(), "Stop left a model process running");
+        runOnMainSync(() -> activity.submit("a what time is it"));
+        check(awaitText("It’s ", 5000), "Clock stopped working after model cancellation");
+        runOnMainSync(activity::finish);
+        activity =
+                (MainActivity)
+                        startActivitySync(
+                                new Intent(getTargetContext(), AssistantActivity.class)
+                                        .setAction(Intent.ACTION_ASSIST)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        waitForIdleSync();
+        LocalChat compactEngine = (LocalChat) field.get(activity);
+        runOnMainSync(() -> activity.submit("What is the capital city of France? Answer briefly."));
+        check(awaitText("Paris", 90000), "Compact assistant did not answer using offline AI");
+        check(!compactEngine.running(), "Compact assistant retained its model after replying");
+        runOnMainSync(() ->
+                activity.submit("Write a very long story about a robot exploring a new planet."));
+        until = android.os.SystemClock.elapsedRealtime() + 12000;
+        while (!compactEngine.running() && android.os.SystemClock.elapsedRealtime() < until)
+            Thread.sleep(100);
+        check(compactEngine.running(), "Background cancellation check never started");
+        runOnMainSync(activity::finish);
+        until = android.os.SystemClock.elapsedRealtime() + 5000;
+        while (compactEngine.running() && android.os.SystemClock.elapsedRealtime() < until)
+            Thread.sleep(100);
+        check(!compactEngine.running(), "Closing the panel retained the model process");
+    }
+
+    private boolean awaitText(String text, long timeout) throws Exception {
+        java.lang.reflect.Field field = MainActivity.class.getDeclaredField("conversation");
+        field.setAccessible(true);
+        long until = android.os.SystemClock.elapsedRealtime() + timeout;
+        while (android.os.SystemClock.elapsedRealtime() < until) {
+            final boolean[] found = {false};
+            runOnMainSync(() -> {
+                try {
+                    ViewGroup messages = (ViewGroup) field.get(activity);
+                    if (messages != null && messages.getChildCount() > 0) {
+                        View last = messages.getChildAt(messages.getChildCount() - 1);
+                        found[0] =
+                                (activity.isAssistantSurface() || findText(last, "MIU") != null)
+                                        && findContains(last, text) != null;
+                    }
+                } catch (IllegalAccessException ex) {
+                    throw new AssertionError(ex);
+                }
+            });
+            if (found[0]) return true;
+            Thread.sleep(200);
+        }
+        return false;
     }
 
     private static TextView findText(View v, String text) {

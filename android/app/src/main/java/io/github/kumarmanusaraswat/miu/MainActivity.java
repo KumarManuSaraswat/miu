@@ -22,6 +22,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     static final int INK = 0xff292934, MUTED = 0xff767684, ACCENT = 0xff746d9d, BG = 0xfff8f7fb;
     private Prefs prefs;
     private SpeechController speech;
+    private LocalChat localChat;
     private final LocalCompanion companion = new LocalCompanion();
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private LinearLayout root, body, conversation, navigation;
@@ -76,6 +77,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         prefs = new Prefs(this);
         speech = new SpeechController(this, prefs, this);
+        localChat = new LocalChat(this);
         Object retained = getLastNonConfigurationInstance();
         if (retained instanceof Retained) {
             messages.addAll(((Retained) retained).messages);
@@ -192,6 +194,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                         "Clear",
                         () -> {
                             speech.stop();
+                            localChat.clear();
                             networkGeneration++;
                             busy = false;
                             GmailBridge.clear();
@@ -397,6 +400,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
 
     private void stopTurn() {
         speech.stop();
+        localChat.cancel();
         networkGeneration++;
         busy = false;
         GmailBridge.clear();
@@ -556,9 +560,11 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         body.addView(composer);
         TextView local =
                 text(
-                        prefs.values.getBoolean("cloud", false)
-                                ? "Optional cloud conversation is on"
-                                : "Everyday help, right on your phone",
+                        prefs.values.getBoolean("local_ai", true) && localChat.packaged()
+                                ? "Gemma 3 · offline · no account needed"
+                                : prefs.values.getBoolean("cloud", false)
+                                        ? "Optional cloud conversation is on"
+                                        : "Everyday help, right on your phone",
                         10,
                         MUTED);
         local.setPadding(dp(3), dp(10), 0, 0);
@@ -674,6 +680,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         if (!screen.equals("Talk")) show("Talk");
         speech.stop();
+        localChat.cancel();
         networkGeneration++;
         busy = false;
         GmailBridge.clear();
@@ -720,17 +727,35 @@ public class MainActivity extends Activity implements SpeechController.Listener 
             if (mascot != null) mascot.setMood(company.mood);
             return;
         }
-        if (!prefs.values.getBoolean("cloud", false) || !prefs.hasKey()) {
+        final boolean offline = prefs.values.getBoolean("local_ai", true);
+        if (offline && !localChat.packaged()) {
+            reply(
+                    "This build does not include the offline model. Install the complete Miu APK"
+                            + " for offline conversation. My device commands still work.",
+                    false);
+            return;
+        }
+        if (!offline && (!prefs.values.getBoolean("cloud", false) || !prefs.hasKey())) {
             reply(LocalCompanion.fallback(), false);
             return;
         }
         int generation = ++networkGeneration;
         busy = true;
-        state("Thinking…", "thinking");
+        state(offline ? "Starting offline AI…" : "Thinking online…", "thinking");
         worker.execute(() -> {
             String answer;
             try {
-                answer = Network.chat(c.argument, prefs);
+                answer =
+                        offline
+                                ? localChat.reply(
+                                        c.argument,
+                                        progress ->
+                                                runOnUiThread(() -> {
+                                                    if (!isDestroyed()
+                                                            && generation == networkGeneration)
+                                                        state(progress, "thinking");
+                                                }))
+                                : Network.chat(c.argument, prefs);
             } catch (Exception ex) {
                 answer =
                         ex instanceof java.io.IOException
@@ -785,6 +810,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
             requestPermissions(new String[] {Manifest.permission.RECORD_AUDIO}, 11);
             return;
         }
+        localChat.cancel();
         networkGeneration++;
         busy = false;
         speech.listen();
@@ -1162,13 +1188,29 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                             }
                             startFloating();
                         }));
-        section(c, "Optional AI conversation");
+        section(c, "Offline AI");
         c.addView(
                 text(
-                        "Local commands, voice and Gmail reading need no AI key. For open-ended"
-                            + " chat, use your own Gemini key. Only the message you submit is sent"
-                            + " to Google; Gmail results, notes and chat history are excluded. Free"
-                            + " quotas and availability depend on your account. Keep billing"
+                        "Gemma 3 runs on your phone with no account or API key. It uses about 1.3"
+                                + " GB of memory while answering, then unloads. Replies can be"
+                                + " mistaken; check important facts.",
+                        14,
+                        MUTED));
+        toggle(
+                c,
+                "Use the included offline model",
+                prefs.values.getBoolean("local_ai", true),
+                value -> {
+                    prefs.values.edit().putBoolean("local_ai", value).apply();
+                    localChat.cancel();
+                });
+        c.addView(button("Model terms and credits", this::showModelTerms));
+        section(c, "Cloud conversation · optional");
+        c.addView(
+                text(
+                        "Used only when you turn offline AI off. Only the message you submit is"
+                            + " sent to Google; Gmail results, notes and chat history are excluded."
+                            + " Free quotas and availability depend on your account. Keep billing"
                             + " disabled if you want a zero-cost setup.",
                         14,
                         MUTED));
@@ -1218,7 +1260,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
                         }));
         toggle(
                 c,
-                "Enable AI chat",
+                "Enable optional Gemini chat",
                 prefs.values.getBoolean("cloud", false),
                 value -> {
                     if (value && !prefs.hasKey()) {
@@ -1477,6 +1519,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         if (speech == null) return;
         active = true;
         speech.setActive(true);
+        if (!busy) state("Ready when you are", prefs.mood());
         if (screen.equals("Settings")) show("Settings");
         receiveScreenResults();
     }
@@ -1498,6 +1541,47 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
     }
 
+    private void showModelTerms() {
+        StringBuilder content = new StringBuilder();
+        try {
+            for (String name :
+                    new String[] {
+                        "NOTICE.txt",
+                        "GEMMA-TERMS.txt",
+                        "GEMMA-PROHIBITED-USE.txt",
+                        "LLAMA-CPP-LICENSE.txt"
+                    }) {
+                content.append("\n\n").append(name).append("\n\n");
+                try (java.io.InputStream stream = getAssets().open("legal/" + name)) {
+                    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                    byte[] buffer = new byte[4096];
+                    int count;
+                    while ((count = stream.read(buffer)) != -1) {
+                        if (bytes.size() + count > 65536)
+                            throw new java.io.IOException("Notice too large");
+                        bytes.write(buffer, 0, count);
+                    }
+                    content.append(bytes.toString("UTF-8"));
+                }
+            }
+        } catch (Exception ex) {
+            content.append(
+                    "\n"
+                            + "Model terms: https://ai.google.dev/gemma/terms\n"
+                            + "Runtime credits: https://github.com/ggml-org/llama.cpp");
+        }
+        ScrollView scroll = new ScrollView(this);
+        TextView notice = text(content.toString().trim(), 14, INK);
+        notice.setTextIsSelectable(true);
+        notice.setPadding(dp(20), dp(12), dp(20), dp(12));
+        scroll.addView(notice);
+        new AlertDialog.Builder(this)
+                .setTitle("Model terms and credits")
+                .setView(scroll)
+                .setPositiveButton("Close", null)
+                .show();
+    }
+
     private void receiveScreenResults() {
         GmailBridge.Result result = GmailBridge.take();
         if (result != null) {
@@ -1515,6 +1599,9 @@ public class MainActivity extends Activity implements SpeechController.Listener 
     @Override
     protected void onPause() {
         active = false;
+        if (localChat != null) localChat.cancel();
+        networkGeneration++;
+        busy = false;
         if (speech != null) speech.setActive(false);
         super.onPause();
     }
@@ -1527,6 +1614,7 @@ public class MainActivity extends Activity implements SpeechController.Listener 
         }
         networkGeneration++;
         if (speech != null) speech.destroy();
+        if (localChat != null) localChat.close();
         worker.shutdownNow();
         messages.clear();
         super.onDestroy();

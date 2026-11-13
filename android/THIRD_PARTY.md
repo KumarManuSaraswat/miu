@@ -1,6 +1,6 @@
 # Android third-party notices
 
-Miu's Android application source, original code-drawn mascot and documentation use the repository's [MIT License](../LICENSE). User-supplied visual references are not bundled. No third-party runtime library, voice engine, speech model or AI model weights are packaged in this APK.
+Miu's Android application source, original code-drawn mascot and documentation use the repository's [MIT License](../LICENSE). User-supplied visual references are not bundled. The ready-to-use 1.0 APK includes Gemma 3 1B Q4_K_M and the ARM64 llama.cpp CPU runtime. Their terms are separate from the app license: see [model terms](../docs/MODEL_TERMS.md) and [preserved notices](../licenses/NOTICE.txt), also included in the APK's legal assets. Settings exposes the model terms and credits. Plain developer/CI APKs omit those model/runtime binaries.
 
 Build and test tooling retains its own licenses:
 

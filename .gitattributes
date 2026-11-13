@@ -13,3 +13,5 @@
 *.java text eol=lf
 *.gradle text eol=lf
 android/gradlew text eol=lf
+# Preserve upstream license text verbatim, including its original whitespace.
+licenses/*.txt -whitespace

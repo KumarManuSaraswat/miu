@@ -1,5 +1,5 @@
 param(
-    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '0.1.0',
+    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version = '1.0.0',
     [string]$OutputDirectory = '',
     [switch]$SelfTest,
     [switch]$DefinitionsOnly
@@ -10,6 +10,9 @@ Set-StrictMode -Version 2
 # This is the single, reviewed release allowlist. Never replace these entries
 # with recursive directory copies, git archive, or a wildcard over dist.
 function Get-MiuReleaseFiles([ValidateSet('source', 'windows-x64')][string]$Kind) {
+    if ($Kind -eq 'source') {
+        return @(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'release-files.txt') | Where-Object { $_ -and -not $_.StartsWith('#') })
+    }
     $common = @(
         'README.md', 'LICENSE', 'PRIVACY.md', 'SECURITY.md', 'CHANGELOG.md', 'CONTRIBUTING.md',
         'CODE_OF_CONDUCT.md', 'GOVERNANCE.md', 'SUPPORT.md', 'docs/MAINTAINING.md',
@@ -19,35 +22,11 @@ function Get-MiuReleaseFiles([ValidateSet('source', 'windows-x64')][string]$Kind
         'scripts/setup-voice.ps1', 'scripts/setup-natural-voice.ps1'
     )
     if ($Kind -eq 'windows-x64') {
-        return @($common + @('dist/Miu.exe', 'dist/Miu.exe.config', 'dist/Miu.Voice.exe',
+        $notices = @(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'release-files.txt') | Where-Object { $_.StartsWith('licenses/') })
+        return @($common + $notices + @('docs/OFFLINE_AI.md', 'docs/MODEL_TERMS.md', 'docs/SPEECH_BUNDLE.md', 'dist/docs/OFFLINE_AI.md', 'dist/docs/MODEL_TERMS.md', 'dist/docs/SPEECH_BUNDLE.md', 'dist/Miu.exe', 'dist/Miu.exe.config', 'dist/Miu.Voice.exe',
             'dist/docs/COMMANDS.md', 'dist/docs/GMAIL_SETUP.md', 'dist/docs/THIRD_PARTY.md', 'dist/docs/RELEASE.md'))
     }
-    return @($common + @(
-        '.gitignore', '.editorconfig', '.gitattributes', 'build.ps1',
-        '.github/workflows/windows.yml',
-        '.github/dependabot.yml', '.github/pull_request_template.md', '.github/ISSUE_TEMPLATE/config.yml',
-        '.github/ISSUE_TEMPLATE/bug_report.yml', '.github/ISSUE_TEMPLATE/feature_request.yml',
-        'assets/miu.ico', 'assets/miu.png',
-        'scripts/package-release.ps1', 'scripts/verify-release.ps1',
-        'scripts/make-icon.ps1', 'scripts/preview-natural-voice.ps1',
-        'src/app.manifest', 'src/Theme.xaml', 'src/AppController.cs',
-        'src/AssemblyInfo.cs', 'src/AssistantEngine.cs', 'src/ChatWindow.cs',
-        'src/CommunityCatalog.cs', 'src/CommunityWindow.cs',
-        'src/Configuration.cs', 'src/DeviceActions.cs', 'src/ExpressionCatalog.cs',
-        'src/GmailService.cs', 'src/MascotFace.cs', 'src/MascotWindow.cs',
-        'src/Native.cs', 'src/PiperSpeech.cs', 'src/Program.cs',
-        'src/ReactionsWindow.cs', 'src/SettingsWindow.cs', 'src/Skin.cs',
-        'src/SpeechService.cs', 'src/VoskSpeech.cs',
-        'tests/EngineTests.cs', 'tests/GmailTests.cs', 'tests/CommunityCatalogTests.cs',
-        'services/catalog/package.json', 'services/catalog/package-lock.json',
-        'services/catalog/.gitignore', 'services/catalog/.dev.vars.example',
-        'services/catalog/wrangler.jsonc', 'services/catalog/README.md',
-        'services/catalog/src/contract.js', 'services/catalog/src/database.js',
-        'services/catalog/src/worker.js', 'services/catalog/src/index.js',
-        'services/catalog/migrations/001_catalog.sql', 'services/catalog/migrations/002_seed_presets.sql',
-        'services/catalog/scripts/check-integration.js',
-        'services/catalog/test/catalog.test.js', 'services/catalog/test/database.test.js'
-    ))
+
 }
 
 function Get-MiuReleaseHash([byte[]]$Bytes) {

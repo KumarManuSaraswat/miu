@@ -165,7 +165,7 @@ namespace Miu
         {
             mute.Content = app.Settings.VoiceEnabled ? "\uE767" : "\uE74F";
             mute.ToolTip = app.Settings.VoiceEnabled ? "Spoken replies on — click to mute" : "Spoken replies off — click to unmute";
-            engineLabel.Text = app.Settings.CloudEnabled ? "GEMINI CHAT  /  LOCAL DEVICE COMMANDS" : "ON DEVICE  /  NO SUBSCRIPTION";
+            engineLabel.Text = app.Settings.LocalAiEnabled ? "OFFLINE GEMMA  /  NO SUBSCRIPTION" : app.Settings.CloudEnabled ? "GEMINI CHAT  /  LOCAL DEVICE COMMANDS" : "ON DEVICE  /  NO SUBSCRIPTION";
         }
         private void UpdateMetrics()
         {

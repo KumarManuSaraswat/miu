@@ -2,9 +2,9 @@ name: Android build and checks
 
 on:
   push:
-    paths: ['android/**', 'scripts/build-android-release.ps1', '.github/workflows/android.yml']
+    paths: ['android/**', 'licenses/**', 'scripts/prepare-local-ai.ps1', 'scripts/build-android-release.ps1', '.github/workflows/android.yml']
   pull_request:
-    paths: ['android/**', 'scripts/build-android-release.ps1', '.github/workflows/android.yml']
+    paths: ['android/**', 'licenses/**', 'scripts/prepare-local-ai.ps1', 'scripts/build-android-release.ps1', '.github/workflows/android.yml']
   workflow_dispatch:
 
 permissions:

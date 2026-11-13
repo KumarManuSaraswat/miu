@@ -4,13 +4,13 @@ A small companion for Windows and Android with an expressive mascot, push-to-tal
 
 ![Miu's calm speaking expressions](assets/miu-speaking-preview.png)
 
-**Version 0.1.0 previews · Windows x64 and Android 8.0+ · MIT-licensed original code.** Optional connections are configured by each user. No paid subscription is required for the app or local commands.
+**Miu 1.0 · Windows x64 and Android 9+ ARM64 · Offline Gemma 3 included.** Download, extract or install, and chat without an account, API key, server or GPU. Original application code is MIT licensed; bundled model weights have [their own terms](docs/MODEL_TERMS.md).
 
 [Downloads](https://github.com/KumarManuSaraswat/miu/releases) · [Build status](https://github.com/KumarManuSaraswat/miu/actions/workflows/windows.yml) · [Commands](docs/COMMANDS.md) · [Support](SUPPORT.md) · [Contribute](CONTRIBUTING.md)
 
 ## Android
 
-Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/android-v0.1.0)** on a phone and open it to install. The native Android app includes 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a small offline conversation engine, a floating mascot, and the optional Neon-backed preset catalog. General AI chat is optional and uses each person's own Gemini key.
+Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0)** on a phone and open it to install. The native Android app includes Gemma 3 1B for offline chat, 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a floating mascot, and the optional Neon-backed preset catalog. Allow about 3 GB free storage for installation and first-use preparation. A 64-bit ARM phone with Android 9+ and at least 4 GB RAM is recommended. Voice requires microphone permission and a suitable installed English speech pack; typing works independently.
 
 Choose Miu through **Settings → Use Miu as phone assistant** to open a compact black mascot panel with your phone's assistant gesture. It supports voice, typing, animated replies and an explicit Open app button. The full app has a refreshed Talk, Looks and Settings layout. Power-button behavior depends on the phone; Miu does not intercept hardware keys or need overlay permission for this panel.
 
@@ -22,16 +22,9 @@ The remaining sections describe the **Windows** app. Its Gmail API integration a
 
 ## Windows: start
 
-Download `miu-0.1.0-windows-x64.zip` from [Releases](https://github.com/KumarManuSaraswat/miu/releases), extract it into a writable folder, and double-click **Start Miu.cmd**. Keep its folders together. Windows with .NET Framework 4.8 is required; Windows 11 x64 is the recommended target. The executable is currently unsigned. Releases include a SHA-256 checksum file for verifying downloads.
+Download `miu-1.0.0-windows-x64.zip` from [Releases](https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.0), extract it into a writable folder, and double-click **Start Miu.cmd**. Keep its folders together. Windows with .NET Framework 4.8 is required; Windows 11 x64 and 8 GB RAM are recommended. The executable is currently unsigned. Releases include SHA-256 checksums.
 
-The lean release contains the app and setup scripts. Windows voices work when installed. For offline English recognition and the more natural English voice, run these once from the extracted folder:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-voice.ps1
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\setup-natural-voice.ps1
-```
-
-Restart Miu after setup. These scripts download upstream speech components with their own licenses; they are not bundled in the lean ZIP. See [third-party notices](docs/THIRD_PARTY.md) and [release instructions](docs/RELEASE.md).
+The ready-to-use download includes Gemma, offline English recognition and the natural English voice. No setup scripts or separate AI downloads are needed. Allow about 3 GB free space for the ZIP and extraction. Dependency licenses and speech sources travel with the download; see [speech bundle details](docs/SPEECH_BUNDLE.md). Developer/CI archives omit downloaded runtimes and are not the end-user bundle.
 
 - Click the mascot to open chat; drag it to move it.
 - Tap the microphone or press **Ctrl+Alt+Space**. Wait for **Listening offline**, speak one request, then pause.
@@ -50,9 +43,9 @@ The microphone is off when idle. Recognition currently supports English, with ac
 | Open supported apps | “Open calculator”, “Open downloads” | None |
 | Notes and volume | “Take a note buy milk”, “Volume down” | None |
 | Expressive companion | “Look playful”, “Show reactions” | None |
-| Voice conversation | One spoken turn at a time | Optional local speech downloads |
+| Voice conversation | One spoken turn at a time | Included offline Windows speech |
 | Read and search Gmail | “Latest email”, “Emails from Alex” | Your Google Desktop OAuth setup |
-| Open-ended AI chat | Ask a general question | Your eligible Gemini API project |
+| Open-ended AI chat | Ask a general question | Included Gemma 3, offline |
 | Community presets | Load curated companion profiles | Optional Neon-backed catalog |
 
 See the [command guide](docs/COMMANDS.md). Commands use an explicit allowlist. Neither model replies, email text, nor downloaded presets can execute arbitrary commands.
@@ -65,7 +58,7 @@ Follow [Gmail setup](docs/GMAIL_SETUP.md), import your own Google Desktop OAuth 
 
 ### AI chat
 
-Local commands and speech work without an AI key. Optional Gemini chat sends your typed or recognized chat text and bounded recent chat context to Google. It requires your own eligible API project and acceptance of Google's current terms. Free quotas, region and age restrictions apply; free availability is not universal or unlimited. Keep paid billing disabled if you need a zero-cost setup. Miu cannot verify your project's billing status.
+Offline Gemma 3 chat is enabled by default. The small model can make mistakes; see [measurements, limits and resource requirements](docs/OFFLINE_AI.md). Its output cannot execute commands. To use optional Gemini instead, explicitly turn Offline AI off and cloud chat on. Gemini sends your chat text and bounded context to Google, requires your own eligible API project, and has provider quotas and terms. Miu cannot verify your project's billing status.
 
 Use **Settings** to configure a key and model. Consult [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing), [terms](https://ai.google.dev/gemini-api/terms), and [privacy details](PRIVACY.md) before enabling it. No API key is included in a release.
 
@@ -91,7 +84,7 @@ The service runs on Neon Free and Workers Free. Its live response and all six pr
 
 ## Memory and privacy
 
-The native app has no resident language model. Local checks observed roughly 100–150 MiB for the app; speech helpers add temporary memory while active. A short recognition test used about 149 MiB of worker working set, and a natural-voice sample peaked around 135 MiB. These are sample measurements, not fixed limits. The UI's memory figure covers the app, not separate helper processes.
+The language model loads only while answering. CPU benchmarks measured about 0.91 GiB for its Windows process and 1.29 GiB RSS on the tested Android phone, in addition to UI and speech memory. The small native UI stays available between turns without retaining that model process. These are sample measurements, not fixed limits; the UI memory figure excludes helper processes. See [the benchmark record](docs/OFFLINE_AI.md).
 
 Vosk loads for each listening turn; Piper loads to generate each spoken reply. Both exit when finished. Chat stays in memory for the session. Notes and Windows-encrypted account secrets stay in `%LOCALAPPDATA%\Miu`. No app telemetry or automatic mail polling is implemented. See [PRIVACY.md](PRIVACY.md) for optional network services and data removal.
 
@@ -109,7 +102,7 @@ cd miu
 
 The desktop suites cover commands, safety, Gmail parsing, speech handling, and the catalog client. They make no live Gmail or AI calls. The catalog has separate tests and an opt-in live database check described in its README. GitHub Actions builds the app, runs checks, and produces verified artifacts; it does not publish or deploy automatically.
 
-Public packages use an explicit file allowlist, exclude local configuration and speech bundles, and include SHA-256 checksums. Read [release instructions](docs/RELEASE.md) before distributing a build. Clean-machine voice setup, microphone compatibility, and hosted services need their own checks.
+Public packages use explicit file allowlists and include SHA-256 checksums. Local configuration, accounts and credentials are excluded. The ready-to-use downloads include verified model/runtime files; the source ZIP and CI artifacts omit them. Read [release instructions](docs/RELEASE.md) before distributing a build. Microphone compatibility and optional hosted services need their own checks.
 
 ## Contribute and support
 
