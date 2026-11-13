@@ -129,7 +129,7 @@ The [project privacy notice](../PRIVACY.md), [security policy](../SECURITY.md), 
 
 ## Build from source
 
-Install JDK 17 or newer supported by Gradle 9.3.1, Android SDK Platform 36 and Build Tools 36.0.0. Set `JAVA_HOME` and `ANDROID_HOME`, or create an ignored `local.properties` with your `sdk.dir`. The project uses Java 17 source, AGP 9.1.0, and a checksum-pinned Gradle 9.3.1 wrapper. It has **no third-party runtime dependencies**. JUnit is used only for local tests.
+Install JDK 17 or newer supported by Gradle 9.9.0, Android SDK Platform 36 and Build Tools 36.0.0. Set `JAVA_HOME` and `ANDROID_HOME`, or create an ignored `local.properties` with your `sdk.dir`. The project uses Java 17 source, AGP 9.1.0, and a checksum-pinned Gradle 9.9.0 wrapper. It has **no third-party runtime dependencies**. JUnit is used only for local tests.
 
 ```sh
 cd android
