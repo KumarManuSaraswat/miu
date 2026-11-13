@@ -12,6 +12,8 @@ A small companion for Windows and Android with an expressive mascot, push-to-tal
 
 Download the signed **[Miu Android APK](https://github.com/KumarManuSaraswat/miu/releases/tag/android-v0.1.0)** on a phone and open it to install. The native Android app includes 24 animated reactions, tap-to-talk using Android speech services, local phone commands, a small offline conversation engine, a floating mascot, and the optional Neon-backed preset catalog. General AI chat is optional and uses each person's own Gemini key.
 
+Choose Miu through **Settings → Use Miu as phone assistant** to open a compact black mascot panel with your phone's assistant gesture. It supports voice, typing, animated replies and an explicit Open app button. The full app has a refreshed Talk, Looks and Settings layout. Power-button behavior depends on the phone; Miu does not intercept hardware keys or need overlay permission for this panel.
+
 Android Gmail support reads opened message bodies through optional Gmail-only accessibility access. It uses the account selected in the phone's Gmail app, without OAuth credentials or notification-preview substitution. Search and latest-message navigation depend on Gmail's interface; opening a message may mark it read. Email text stays on the phone and is excluded from AI requests. See the **[Android guide, privacy details and build instructions](android/README.md)** before enabling permissions.
 
 Optional WhatsApp access reads visible chat text and prepares explicitly requested messages for review before a single Send action. Screen integrations are experimental and depend on the installed apps' controls. See the [Android verification record](android/VERIFICATION.md) for what has and has not been tested.

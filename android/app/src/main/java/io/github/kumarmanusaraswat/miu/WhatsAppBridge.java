@@ -14,12 +14,14 @@ final class WhatsAppBridge {
         final Mode mode;
         final WhatsAppDraft draft;
         final String recipient;
+        final boolean assistant;
         final long started = android.os.SystemClock.elapsedRealtime();
 
-        Request(Mode mode, WhatsAppDraft draft, String recipient) {
+        Request(Mode mode, WhatsAppDraft draft, String recipient, boolean assistant) {
             this.mode = mode;
             this.draft = draft;
             this.recipient = recipient;
+            this.assistant = assistant;
         }
     }
 
@@ -51,9 +53,9 @@ final class WhatsAppBridge {
         if (service != null) service.cancel();
     }
 
-    static void start(Mode mode, WhatsAppDraft draft, String recipient) {
+    static void start(Mode mode, WhatsAppDraft draft, String recipient, boolean assistant) {
         clear();
-        request = new Request(mode, draft, recipient);
+        request = new Request(mode, draft, recipient, assistant);
         if (service != null) service.begin();
     }
 

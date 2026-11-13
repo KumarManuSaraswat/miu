@@ -205,7 +205,10 @@ public final class GmailScreenService extends AccessibilityService {
                             nodes,
                             n ->
                                     label(n).equalsIgnoreCase("No results")
-                                            || label(n).equalsIgnoreCase("No results found"))
+                                            || label(n).equalsIgnoreCase("No results found")
+                                            || label(n).equalsIgnoreCase("No matches")
+                                            || label(n).equalsIgnoreCase("No conversations found")
+                                            || label(n).equalsIgnoreCase("No conversations found."))
                     != null) {
                 finish("Gmail found no matching messages.", false);
                 return;
@@ -217,6 +220,8 @@ public final class GmailScreenService extends AccessibilityService {
                             nodes,
                             n ->
                                     (id(n).endsWith("/conversation_list_item")
+                                                    || id(n).endsWith(
+                                                                    "/viewified_conversation_item_view")
                                                     || id(n).endsWith(
                                                                     "/conversation_list_item_view")
                                                     || id(n).endsWith(
@@ -315,12 +320,13 @@ public final class GmailScreenService extends AccessibilityService {
     }
 
     private void finish(String text, boolean email) {
+        boolean assistant = current != null && current.assistant;
         GmailBridge.request = null;
         GmailBridge.result = new GmailBridge.Result(text, email);
         cancel();
         if (!locked()) {
             Intent intent =
-                    new Intent(this, MainActivity.class)
+                    new Intent(this, assistant ? AssistantActivity.class : MainActivity.class)
                             .addFlags(
                                     Intent.FLAG_ACTIVITY_NEW_TASK
                                             | Intent.FLAG_ACTIVITY_SINGLE_TOP

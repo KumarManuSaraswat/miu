@@ -271,7 +271,7 @@ final class SpeechController implements RecognitionListener {
             cancelListening();
             report.accept(
                     "The speech provider could not check its languages. Open Android’s speech"
-                        + " recognition settings.");
+                            + " recognition settings.");
         }
     }
 
@@ -349,7 +349,7 @@ final class SpeechController implements RecognitionListener {
             cancelListening();
             report.accept(
                     "The speech provider could not request a download. Open Android’s speech"
-                        + " recognition settings.");
+                            + " recognition settings.");
         }
     }
 

@@ -52,10 +52,15 @@ public final class CommandRouter {
         if (raw == null) return new Command(Kind.HELP, "");
         String text = raw.trim();
         if (text.length() > 2000) return new Command(Kind.CHAT, text.substring(0, 2000));
-        String s = text.toLowerCase(Locale.ROOT).replaceAll("[?!.,]+$", "").trim();
-        s =
-                s.replaceFirst("^(?:hey |hi )?miu[, ]+", "")
-                        .replaceFirst("^(?:please|can you|could you)\\s+", "");
+        String commandText =
+                text.replaceFirst("(?i)^(?:(?:hey|hi|hello)[, ]+)?miu[, ]+", "")
+                        .replaceFirst("(?i)^(?:please|can you|could you)\\s+", "");
+        String s =
+                commandText
+                        .toLowerCase(Locale.ROOT)
+                        .replace('’', '\'')
+                        .replaceAll("[?!.,]+$", "")
+                        .trim();
         // A recognizer sometimes prefixes a short filler to an otherwise complete request.
         s = s.replaceFirst("^(?:a|uh|um)\\s+(?=what|tell|check|open|read|show|set)", "");
         if (s.matches(
@@ -68,20 +73,21 @@ public final class CommandRouter {
                 "(?:check |what(?:'s| is) |tell me )?(?:(?:my|the) )?battery(?: level|"
                         + " percentage)?")) return c(Kind.BATTERY);
         if (s.matches("help|what can you do|commands|show commands")) return c(Kind.HELP);
-        if (s.matches("hi|hello|hey|good (?:morning|evening|afternoon)")) return c(Kind.GREETING);
-        if (s.matches("thanks|thank you|thank you miu")) return c(Kind.THANKS);
+        if (s.matches("(?:hi|hello|hey|good (?:morning|evening|afternoon))(?:[, ]+miu)?|miu"))
+            return c(Kind.GREETING);
+        if (s.matches("(?:thanks|thank you)(?:[, ]+miu)?")) return c(Kind.THANKS);
         if (s.matches("stop|cancel|be quiet|stop speaking")) return c(Kind.STOP);
         if (s.matches(
                 "(?:read|check)(?: my| the| this)? whatsapp(?: messages| chat| screen)?|read"
                         + " (?:this|the open) whatsapp chat")) return c(Kind.WHATSAPP_READ);
         if (s.matches("(?:send|write)(?: a)? (?:whatsapp.*|message on whatsapp.*)"))
-            return new Command(Kind.WHATSAPP_SEND, text);
+            return new Command(Kind.WHATSAPP_SEND, commandText);
         if (s.matches("show (?:my )?notes|read (?:my )?notes|my notes")) return c(Kind.NOTES);
         Matcher note =
                 Pattern.compile(
                                 "^(?:take (?:a )?note|note|remember)[: ]+(.+)$",
                                 Pattern.CASE_INSENSITIVE)
-                        .matcher(text);
+                        .matcher(commandText);
         if (note.matches()) return new Command(Kind.NOTE, note.group(1).trim());
         if (s.matches("volume up|turn (?:the )?volume up|louder")) return c(Kind.VOLUME_UP);
         if (s.matches("volume down|turn (?:the )?volume down|quieter")) return c(Kind.VOLUME_DOWN);

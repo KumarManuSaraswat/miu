@@ -2,8 +2,9 @@
 
 ## Android 0.1.0 preview
 
+- Refreshed Talk, Looks and Settings UI, plus a compact black assistant panel with animated reactions, typing, tap-to-talk and optional listening on invocation. Handles Android's saved assistant target from earlier previews without opening the full app.
 - Native Android 8.0+ app with 24 vector expressions, a gentle speaking face, tap-to-talk, local phone commands, optional floating companion and Quick Settings shortcut.
-- On-demand Android speech recognition, offline English text-to-speech, uncertainty review, cancellation and microphone cleanup when leaving the app.
+- On-demand Android speech recognition with installed-English selection and language-pack checks, offline English text-to-speech, uncertainty review, cancellation and microphone cleanup when leaving the app.
 - Optional Gmail-only accessibility access for opened message bodies and best-effort Gmail search/latest-message navigation. No notification-preview substitution, mailbox credentials or email upload. Opening messages may mark them read.
 - Optional user-key Gemini chat isolated from email/notes, Keystore encryption, disabled app backups, and explicit loads from the free Neon-backed public preset catalog.
 - Offline greetings, moods, jokes, ideas and bounded arithmetic without a model/server; sparse animated blinks, glances, head motion and reaction bursts with reduced-motion support.

@@ -201,15 +201,19 @@ public final class MascotView extends View {
                         || mood.equals("joyful")
                         || mood.equals("playful")
                         || mood.equals("excited");
-        c.translate(0, lift - (lively ? 3 : 1) * reaction);
+        c.translate(0, lift - (lively ? 6 : 2) * reaction);
         c.rotate(
                 reaction
                         * (mood.equals("sad")
-                                ? 3
-                                : mood.equals("blushing") ? -4 : mood.equals("skeptical") ? 4 : 1),
+                                ? 5
+                                : mood.equals("blushing")
+                                        ? -6
+                                        : mood.equals("skeptical") ? 6 : 2.5f),
                 94,
                 130);
-        c.scale(1 + .015f * reaction, 1 - .018f * reaction, 94, 145);
+        c.scale(1 + .025f * reaction, 1 - .03f * reaction, 94, 145);
+        if (moving && (mood.equals("scrunched") || mood.equals("annoyed")))
+            c.rotate((float) Math.sin((now - reactionStart) / 85.0) * 3 * reaction, 94, 110);
         style(0x160d0e14, 0);
         c.drawOval(43, 160, 149, 170, paint);
         style(0xff989aa6, 12);
@@ -234,14 +238,27 @@ public final class MascotView extends View {
         c.save();
         c.translate(moving ? Motion.glance(elapsed) : 0, 0);
         c.save();
-        c.scale(1, moving ? Motion.blink(elapsed) : 1, 94, 95);
+        c.scale(
+                1 + (lively ? .1f : .04f) * reaction,
+                (moving ? Motion.blink(elapsed) : 1) * (1 + .14f * reaction),
+                94,
+                95);
         eyes(c, face);
         c.restore();
+        c.save();
+        if (moving && (mood.equals("crying") || mood.equals("shocked")))
+            c.translate(0, 4 * reaction);
         accents(c, face);
+        c.restore();
         if (mood.equals("speaking")) {
             float h = moving ? 2 + (float) Math.abs(Math.sin(now / 110.0)) * 4.5f : 3;
             eye(c, 94, 117, 12, h);
-        } else mouth(c, face);
+        } else {
+            c.save();
+            c.scale(1 + .12f * reaction, 1 + .16f * reaction, 94, 117);
+            mouth(c, face);
+            c.restore();
+        }
         if (mood.equals("listening")) {
             for (int i = 0; i < 5; i++) {
                 float h = reduced ? 4 : 3 + (float) Math.abs(Math.sin((frame + i) * .8)) * 8;

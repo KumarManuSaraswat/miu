@@ -11,11 +11,13 @@ final class GmailBridge {
     static final class Request {
         final Mode mode;
         final String query;
+        final boolean assistant;
         final long started = android.os.SystemClock.elapsedRealtime();
 
-        Request(Mode m, String q) {
+        Request(Mode m, String q, boolean a) {
             mode = m;
             query = q;
+            assistant = a;
         }
     }
 
@@ -43,9 +45,9 @@ final class GmailBridge {
         return service != null;
     }
 
-    static void start(Mode mode, String query) {
+    static void start(Mode mode, String query, boolean assistant) {
         clear();
-        request = new Request(mode, query);
+        request = new Request(mode, query, assistant);
         if (service != null) service.begin();
     }
 

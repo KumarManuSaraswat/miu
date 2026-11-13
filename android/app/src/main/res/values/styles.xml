@@ -11,4 +11,14 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
     <style name="Theme.Miu" parent="Theme.Miu.Base" />
+    <style name="Theme.Miu.Assistant" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#C8C1E5</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 </resources>

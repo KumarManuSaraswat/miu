@@ -14,7 +14,8 @@ public final class MiuTileService extends TileService {
         super.onClick();
         unlockAndRun(() -> {
             Intent intent =
-                    new Intent(this, MainActivity.class)
+                    new Intent(this, AssistantActivity.class)
+                            .setAction(Intent.ACTION_ASSIST)
                             .addFlags(
                                     Intent.FLAG_ACTIVITY_NEW_TASK
                                             | Intent.FLAG_ACTIVITY_SINGLE_TOP);

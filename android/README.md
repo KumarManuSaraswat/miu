@@ -6,6 +6,8 @@ Miu is designed to stay useful in your pocket without a server. Its small offlin
 
 **Android 8.0+ · Java / Android framework · MIT · 0.1.0 preview**
 
+<p><img src="../assets/miu-android-home.png" width="260" alt="Miu Android home with its animated mascot and local task shortcuts"> <img src="../assets/miu-android-assistant.png" width="260" alt="Compact black Miu assistant panel over the app"></p>
+
 ## Install and share
 
 Download **miu-0.1.0-android.apk** from the [Android release](https://github.com/KumarManuSaraswat/miu/releases/tag/android-v0.1.0) directly on your phone. Open it and approve installation from the browser or file manager you used. You can turn that installer permission off afterward. The APK is signed by the Miu project; updates must use the same signing certificate. No Play Store purchase is required.
@@ -82,9 +84,23 @@ WhatsApp handles delivery and needs its own internet connection. Miu reports han
 
 **Settings → Show floating Miu** opens Android's overlay permission if needed. Return and tap the button again after enabling it. Android 13+ also asks for notification permission so the running companion has a visible stop control.
 
-Drag the little mascot, tap it to open Miu, or long-press to hide it. You can also use **Hide Miu** in its notification. The companion hides on the lock screen and does not start at boot. It never opens the microphone or reads other screens. Android may stop it to reclaim memory.
+Drag the little mascot, tap it to open the compact assistant panel, or long-press to hide it. You can also use **Hide Miu** in its notification. The companion hides on the lock screen and does not start at boot. The floating service itself never opens the microphone or reads other screens. Android may stop it to reclaim memory.
 
-Add the **Miu** tile using your phone's Quick Settings editor for a shortcut without an overlay. It opens Miu; it does not start recording. Android's power button remains controlled by the phone and its chosen system assistant.
+Add the **Miu** tile using your phone's Quick Settings editor for a shortcut without an overlay. It opens the same compact panel after unlocking.
+
+## The phone-assistant panel
+
+**Settings → Preview assistant** opens a separate black panel over your current app. It has Miu's animated face, a compact reply area, Mic, Stop, Type and Close. **Open app** is the explicit route to the full interface. The launcher icon still opens the full app for conversations, faces and settings. The assistant panel does not need overlay permission.
+
+Use **Settings → Use Miu as phone assistant**, then choose Miu in Android's system picker yourself. Android supports an assistant role for apps handling `ACTION_ASSIST`; see the [Android role documentation](https://source.android.com/docs/core/permissions/android-roles). Miu handles that action in its dedicated assistant activity, and does not read the system's supplied screen-context extras.
+
+If you selected Miu in an older preview and Android still brings up the full app first, try opening that picker, selecting **None**, then selecting **Miu** again. Some devices retain the older activity target; Miu also forwards requests addressed to that target to the compact panel.
+
+The phone manufacturer controls how that assistant is invoked. A **long** power-button press, a Home gesture or another configured assistant shortcut may open it. Some phones need an additional gesture/side-button setting; selecting Miu cannot guarantee that every manufacturer's power button will use it. A normal short power press still locks the phone. Miu does not intercept hardware keys or change these system settings silently.
+
+Tap **Mic** to talk. **Listen when assistant opens** is an optional setting, off by default, that starts one microphone turn whenever this panel is invoked through an assistant shortcut, preview or floating-mascot tap. It uses the same microphone permission and speech-provider consent as the full app. Stop, dismissal, leaving the panel and locking stop the current microphone session. It never adds a wake word or background recording. Email/WhatsApp results return to the surface that requested them and do not restart automatic listening.
+
+The face blinks and looks around at rest, changes its eyes, mouth and head motion during reactions, and animates while listening and speaking. Reduced motion also applies here. Conversations survive an in-process screen rotation, but are not written to saved-state files or restored after process death.
 
 ## Optional Gemini and Neon
 

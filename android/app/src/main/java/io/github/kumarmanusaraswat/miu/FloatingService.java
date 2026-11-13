@@ -61,7 +61,7 @@ public final class FloatingService extends Service {
                 PendingIntent.getActivity(
                         this,
                         1,
-                        new Intent(this, MainActivity.class),
+                        new Intent(this, AssistantActivity.class).setAction(Intent.ACTION_ASSIST),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent stop =
                 PendingIntent.getService(
@@ -103,7 +103,8 @@ public final class FloatingService extends Service {
         params.y = 220;
         face.setOnClickListener(v ->
                 startActivity(
-                        new Intent(this, MainActivity.class)
+                        new Intent(this, AssistantActivity.class)
+                                .setAction(Intent.ACTION_ASSIST)
                                 .addFlags(
                                         Intent.FLAG_ACTIVITY_NEW_TASK
                                                 | Intent.FLAG_ACTIVITY_SINGLE_TOP)));

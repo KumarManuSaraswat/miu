@@ -32,8 +32,14 @@ public final class MiuInstrumentation extends Instrumentation {
         Bundle result = new Bundle();
         Prefs prefs = new Prefs(getTargetContext());
         boolean voice = prefs.voice();
+        boolean assistantAutoListen = prefs.values.getBoolean("assistant_auto_listen", false);
         try {
-            prefs.values.edit().putBoolean("voice", false).putBoolean("cloud", false).commit();
+            prefs.values
+                    .edit()
+                    .putBoolean("voice", false)
+                    .putBoolean("cloud", false)
+                    .putBoolean("assistant_auto_listen", false)
+                    .commit();
             activity =
                     (MainActivity)
                             startActivitySync(
@@ -42,7 +48,7 @@ public final class MiuInstrumentation extends Instrumentation {
             waitForIdleSync();
             runOnMainSync(() -> {
                 check(
-                        findText(activity.getWindow().getDecorView(), "Hello, you.") != null,
+                        findText(activity.getWindow().getDecorView(), "Hey, I’m Miu.") != null,
                         "Home title missing");
                 check(activity.findViewById(R.id.message_input) != null, "Composer missing");
                 check(
@@ -140,6 +146,150 @@ public final class MiuInstrumentation extends Instrumentation {
                 Button clear = (Button) findText(activity.getWindow().getDecorView(), "Clear");
                 clear.performClick();
             });
+            android.view.accessibility.AccessibilityNodeInfo entry =
+                    android.view.accessibility.AccessibilityNodeInfo.obtain();
+            entry.setEditable(true);
+            entry.setText("Message");
+            entry.setHintText("Message");
+            entry.setShowingHintText(true);
+            check(
+                    WhatsAppScreenService.text(entry).isEmpty(),
+                    "Empty editor hint was treated as a draft");
+            entry.setShowingHintText(false);
+            check(
+                    WhatsAppScreenService.text(entry).equals("Message"),
+                    "A real draft matching the hint was discarded");
+            entry.setText("Keep this draft");
+            check(
+                    WhatsAppScreenService.text(entry).equals("Keep this draft"),
+                    "Existing draft changed");
+            entry.setText("Message");
+            entry.setTextSelection(0, 0);
+            android.view.accessibility.AccessibilityNodeInfo voiceControl =
+                    android.view.accessibility.AccessibilityNodeInfo.obtain();
+            voiceControl.setViewIdResourceName("com.whatsapp:id/voice_note_btn");
+            voiceControl.setVisibleToUser(true);
+            voiceControl.setEnabled(true);
+            ArrayList<android.view.accessibility.AccessibilityNodeInfo> composerNodes =
+                    new ArrayList<>(Arrays.asList(entry, voiceControl));
+            check(
+                    WhatsAppScreenService.composerText(entry, composerNodes).isEmpty(),
+                    "WhatsApp's unflagged empty placeholder was treated as a draft");
+            android.view.accessibility.AccessibilityNodeInfo sendControl =
+                    android.view.accessibility.AccessibilityNodeInfo.obtain();
+            sendControl.setViewIdResourceName("com.whatsapp:id/send");
+            sendControl.setVisibleToUser(true);
+            composerNodes.add(sendControl);
+            check(
+                    WhatsAppScreenService.composerText(entry, composerNodes).equals("Message"),
+                    "Real placeholder-named draft with Send was discarded");
+            composerNodes.remove(sendControl);
+            entry.setTextSelection(7, 7);
+            check(
+                    WhatsAppScreenService.composerText(entry, composerNodes).equals("Message"),
+                    "An editor with actual text selection was treated as empty");
+            entry.setTextSelection(0, 0);
+            composerNodes.remove(voiceControl);
+            check(
+                    WhatsAppScreenService.composerText(entry, composerNodes).equals("Message"),
+                    "Unknown composer state was treated as empty");
+            entry.setText("  ");
+            check(
+                    WhatsAppScreenService.composerText(entry, composerNodes).equals("  "),
+                    "An existing whitespace draft was discarded");
+            voiceControl.recycle();
+            sendControl.recycle();
+            entry.recycle();
+            Intent assist =
+                    new Intent(Intent.ACTION_ASSIST)
+                            .setPackage(getTargetContext().getPackageName());
+            android.content.pm.ResolveInfo resolved =
+                    getTargetContext().getPackageManager().resolveActivity(assist, 0);
+            check(
+                    resolved != null
+                            && resolved.activityInfo.name.equals(AssistantActivity.class.getName()),
+                    "Android assist does not resolve to the compact surface");
+            MainActivity compact =
+                    (MainActivity)
+                            startActivitySync(
+                                    new Intent(getTargetContext(), AssistantActivity.class)
+                                            .setAction(Intent.ACTION_ASSIST)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            waitForIdleSync();
+            runOnMainSync(() -> {
+                View view = compact.getWindow().getDecorView();
+                check(
+                        findText(view, "Talk") == null && findText(view, "Settings") == null,
+                        "Full app navigation leaked into assistant panel");
+                check(
+                        !compact.findViewById(R.id.message_input).isShown(),
+                        "Assistant unexpectedly opened the keyboard composer");
+                check(
+                        compact.findViewById(R.id.microphone).getHeight()
+                                >= 48 * compact.getResources().getDisplayMetrics().density,
+                        "Assistant microphone target too small");
+                check(
+                        (compact.getWindow().getAttributes().gravity
+                                        & Gravity.VERTICAL_GRAVITY_MASK)
+                                == Gravity.BOTTOM,
+                        "Assistant panel is not anchored at bottom");
+                compact.submit("a what time is it");
+            });
+            waitForIdleSync();
+            runOnMainSync(() -> {
+                check(
+                        findContains(compact.getWindow().getDecorView(), "It’s ") != null,
+                        "Compact assistant did not handle a local command");
+                check(
+                        findText(compact.getWindow().getDecorView(), "Open app") != null,
+                        "Assistant has no explicit full-app route");
+                findText(compact.getWindow().getDecorView(), "Type").performClick();
+            });
+            waitForIdleSync();
+            runOnMainSync(() ->
+                    check(
+                            compact.findViewById(R.id.message_input).isShown()
+                                    && compact.findViewById(R.id.message_input).hasFocus(),
+                            "Assistant typing field is not ready"));
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                boolean[] keyboard = {false};
+                for (int attempt = 0; attempt < 30 && !keyboard[0]; attempt++) {
+                    android.os.SystemClock.sleep(100);
+                    runOnMainSync(() -> {
+                        WindowInsets insets =
+                                compact.getWindow().getDecorView().getRootWindowInsets();
+                        keyboard[0] = insets != null && insets.isVisible(WindowInsets.Type.ime());
+                    });
+                }
+                check(keyboard[0], "Assistant Type button did not open the keyboard");
+            }
+            runOnMainSync(() -> {
+                compact.finish();
+            });
+            waitForIdleSync();
+            for (boolean cold : new boolean[] {false, true}) {
+                if (cold) {
+                    runOnMainSync(() -> activity.finish());
+                    waitForIdleSync();
+                }
+                ActivityMonitor monitor =
+                        addMonitor(AssistantActivity.class.getName(), null, false);
+                getTargetContext()
+                        .startActivity(
+                                new Intent(getTargetContext(), MainActivity.class)
+                                        .setAction(Intent.ACTION_ASSIST)
+                                        .addFlags(
+                                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                                        | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                                        | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                Activity forwarded = waitForMonitorWithTimeout(monitor, 5000);
+                removeMonitor(monitor);
+                check(
+                        forwarded instanceof AssistantActivity,
+                        "Saved legacy assistant component did not open panel; cold=" + cold);
+                runOnMainSync(forwarded::finish);
+                waitForIdleSync();
+            }
             result.putString(
                     "stream",
                     "Miu device checks passed: " + checks + "; live catalog=" + online + "\n");
@@ -154,7 +304,11 @@ public final class MiuInstrumentation extends Instrumentation {
                             + "\n");
             finish(Activity.RESULT_CANCELED, result);
         } finally {
-            prefs.values.edit().putBoolean("voice", voice).apply();
+            prefs.values
+                    .edit()
+                    .putBoolean("voice", voice)
+                    .putBoolean("assistant_auto_listen", assistantAutoListen)
+                    .apply();
         }
     }
 

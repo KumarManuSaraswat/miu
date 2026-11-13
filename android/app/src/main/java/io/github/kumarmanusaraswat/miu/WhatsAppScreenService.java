@@ -160,7 +160,7 @@ public final class WhatsAppScreenService extends AccessibilityService {
             return;
         }
         if (current.mode == WhatsAppBridge.Mode.PREVIEW) {
-            if (!text(entry).isEmpty()) {
+            if (!composerText(entry, nodes).isEmpty()) {
                 finish(
                         "This chat already has a draft. Send or clear it yourself first; I won’t"
                                 + " overwrite it.",
@@ -182,7 +182,7 @@ public final class WhatsAppScreenService extends AccessibilityService {
             return;
         }
         if (!filled) {
-            if (!text(entry).isEmpty()) {
+            if (!composerText(entry, nodes).isEmpty()) {
                 finish(
                         "A draft appeared in the chat. I left it untouched and did not send"
                                 + " anything.",
@@ -241,13 +241,14 @@ public final class WhatsAppScreenService extends AccessibilityService {
     }
 
     private void finish(String text, boolean sensitive, String recipient, WhatsAppDraft draft) {
+        boolean assistant = current != null && current.assistant;
         WhatsAppBridge.request = null;
         WhatsAppBridge.result = new WhatsAppBridge.Result(text, sensitive, recipient, draft);
         cancel();
         if (!locked())
             try {
                 startActivity(
-                        new Intent(this, MainActivity.class)
+                        new Intent(this, assistant ? AssistantActivity.class : MainActivity.class)
                                 .addFlags(
                                         Intent.FLAG_ACTIVITY_NEW_TASK
                                                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -256,8 +257,33 @@ public final class WhatsAppScreenService extends AccessibilityService {
             }
     }
 
-    private static String text(AccessibilityNodeInfo n) {
+    static String text(AccessibilityNodeInfo n) {
+        // Android exposes an empty EditText's hint through getText(). Only the explicit
+        // hint flag makes it empty; a real draft equal to the hint must still be preserved.
+        if (n.isEditable() && n.isShowingHintText()) return "";
         return n.getText() == null ? "" : n.getText().toString().trim();
+    }
+
+    static String composerText(AccessibilityNodeInfo entry, List<AccessibilityNodeInfo> nodes) {
+        String value =
+                entry.isShowingHintText() || entry.getText() == null
+                        ? ""
+                        : entry.getText().toString();
+        // Some WhatsApp versions expose "Message" as text without Android's hint flag.
+        // Require the empty composer's voice control AND absence of Send. A real draft,
+        // including one literally named "Message", exposes Send and must stay untouched.
+        AccessibilityNodeInfo voice = find(nodes, "voice_note_btn");
+        boolean placeholder =
+                "Message".equals(value)
+                        || (entry.getHintText() != null
+                                && value.contentEquals(entry.getHintText()));
+        if (placeholder
+                && voice != null
+                && voice.isEnabled()
+                && find(nodes, "send") == null
+                && entry.getTextSelectionStart() <= 0
+                && entry.getTextSelectionEnd() <= 0) return "";
+        return value;
     }
 
     private static String id(AccessibilityNodeInfo n) {

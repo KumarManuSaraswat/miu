@@ -22,7 +22,7 @@ final class Motion {
 
     static float glance(long elapsed) {
         long p = phase(elapsed);
-        return p >= 3000 && p < 3900 ? (float) (3 * Math.sin(Math.PI * (p - 3000) / 900.0)) : 0;
+        return p >= 3000 && p < 3900 ? (float) (5 * Math.sin(Math.PI * (p - 3000) / 900.0)) : 0;
     }
 
     static float bob(long elapsed) {
