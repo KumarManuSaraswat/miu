@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>Miu — Your little offline AI companion</title>
+  <meta name="description" content="Meet Miu, a free, open-source AI companion for Windows and Android. Talk with offline Gemma, enjoy animated expressions, and get help with everyday tasks.">
+  <link rel="canonical" href="https://miu-companion.kumarsaraswat1983.chatgpt.site/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Miu — A little company, wherever you are">
+  <meta property="og:description" content="A friendly face. A familiar voice. Offline AI for your phone and laptop. Free and open source.">
+  <meta property="og:url" content="https://miu-companion.kumarsaraswat1983.chatgpt.site/">
+  <meta property="og:image" content="https://miu-companion.kumarsaraswat1983.chatgpt.site/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/manrope.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Miu","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows x64, Android 9+ ARM64","softwareVersion":"1.0.1","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://miu-companion.kumarsaraswat1983.chatgpt.site/","downloadUrl":"https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1","codeRepository":"https://github.com/KumarManuSaraswat/miu","description":"An open-source offline AI companion with voice, animated reactions and everyday device commands."}</script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="shell" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#666570"/><stop offset=".5" stop-color="#3d3d47"/><stop offset="1" stop-color="#25252d"/></linearGradient>
+      <linearGradient id="glass" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#18191f"/><stop offset="1" stop-color="#090a0f"/></linearGradient>
+      <linearGradient id="antenna" x1="0" y1="0" x2=".3" y2="1"><stop stop-color="#c7c5d0"/><stop offset="1" stop-color="#8f8c9c"/></linearGradient>
+      <symbol id="miu-shell" viewBox="0 0 340 320">
+        <path d="M59 69Q70 28 116 22" fill="none" stroke="url(#antenna)" stroke-width="23" stroke-linecap="round"/>
+        <path d="M57 66Q70 30 113 24" fill="none" stroke="#ffffff" opacity=".2" stroke-width="3.5" stroke-linecap="round"/>
+        <rect x="52" y="76" width="246" height="216" rx="66" fill="url(#shell)" stroke="#71707b" stroke-width="1.5"/>
+        <rect x="57" y="81" width="236" height="206" rx="61" fill="none" stroke="#b8b4c6" stroke-opacity=".18" stroke-width="1.4"/>
+        <rect x="66" y="91" width="218" height="185" rx="53" fill="url(#glass)" stroke="#777480" stroke-opacity=".6" stroke-width="1.5"/>
+        <path d="M89 108Q161 88 255 107" fill="none" stroke="#e8e6f5" stroke-width="3.5" opacity=".09" stroke-linecap="round"/>
+        <circle cx="175" cy="284" r="2.5" fill="#a6a0b8" opacity=".7"/>
+      </symbol>
+      <symbol id="face-happy" viewBox="0 0 340 320"><g class="gaze"><g class="eyes" fill="#f5f3ff"><rect x="116" y="153" width="20" height="40" rx="10"/><rect x="214" y="153" width="20" height="40" rx="10"/></g></g><path d="M158 216Q175 235 192 216" class="face-line"/></symbol>
+      <symbol id="face-curious" viewBox="0 0 340 320"><g class="gaze"><g class="face-line eyes"><circle cx="126" cy="174" r="17"/><circle cx="224" cy="174" r="17"/></g></g><path d="M158 218Q167 230 175 218Q183 230 192 218" class="face-line"/></symbol>
+      <symbol id="face-playful" viewBox="0 0 340 320"><g class="gaze"><path class="eyes" d="M109 180a17 17 0 0 1 34 0ZM207 180a17 17 0 0 1 34 0Z" fill="#f5f3ff"/></g><path d="M158 211Q175 221 192 211M167 216v17q8 13 16 0v-17M175 220v13" class="face-line"/></symbol>
+      <symbol id="face-sleepy" viewBox="0 0 340 320"><g class="gaze"><path d="M110 173h32M208 173h32" class="face-line eyes"/></g><path d="M159 216q8 11 16 0q8 11 16 0" class="face-line"/></symbol>
+      <symbol id="face-delighted" viewBox="0 0 340 320"><g class="gaze"><path d="M110 181q16-22 32 0M208 181q16-22 32 0" class="face-line eyes"/></g><path d="M157 214q18 35 36 0Z" class="face-line"/></symbol>
+      <symbol id="face-blushing" viewBox="0 0 340 320"><g class="gaze"><g class="eyes" fill="#f5f3ff"><rect x="118" y="158" width="16" height="31" rx="8"/><rect x="216" y="158" width="16" height="31" rx="8"/></g></g><path d="M158 216q17 17 34 0" class="face-line"/><path d="M105 206l-2 8m10-8-2 8m128-8-2 8m10-8-2 8" fill="none" stroke="#c7b3e8" stroke-width="4" stroke-linecap="round"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
+      <symbol id="i-device" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4M9 8l3 3 3-3"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m7 6-5 6 5 6m10-12 5 6-5 6m-4-15-2 18"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V6a4 4 0 0 1 8 0v4m-4 5v2"/></symbol>
+      <symbol id="i-windows" viewBox="0 0 24 24"><path d="M3 4h8v7H3Zm10 0h8v7h-8ZM3 13h8v7H3Zm10 0h8v7h-8Z" fill="currentColor" stroke="none"/></symbol>
+      <symbol id="i-android" viewBox="0 0 24 24"><path d="m7 5-2-3m12 3 2-3M4 11a8 8 0 0 1 16 0v7H4Zm3 7v4m10-4v4M1 11v6m22-6v6"/><path d="M8 8h.1M16 8h.1" stroke-width="2.5"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4 1-4-2-6-2m12 5v-4a3 3 0 0 0-1-2.3c3.3-.4 6.8-1.6 6.8-7.3A5.7 5.7 0 0 0 19.2 4c.2-1.1.1-2.3-.4-3.3 0 0-1.3-.4-4.4 1.6a15 15 0 0 0-8 0C3.3.3 2 .7 2 .7 1.5 1.7 1.4 2.9 1.6 4A5.7 5.7 0 0 0 0 8.4c0 5.7 3.5 6.9 6.8 7.3A3 3 0 0 0 6 18v4" transform="translate(1.5 0) scale(.9)"/></symbol>
+    </defs>
+  </svg>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Miu home"><img src="assets/favicon.svg" width="36" height="36" alt=""><span>miu</span></a>
+    <nav aria-label="Main navigation"><a href="#meet">Meet Miu</a><a href="#offline">Why offline?</a><a href="#personality">Personality</a></nav>
+    <a class="button small" href="#download">Get Miu <svg class="icon"><use href="#i-down"/></svg></a>
+  </header>
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <a class="release-pill" href="https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1"><span class="tiny-star">✦</span> Meet Miu 1.0.1 <span class="pill-divider"></span> Free for Windows &amp; Android <span aria-hidden="true">↗</span></a>
+        <h1 id="hero-title">A little company,<br><span class="soft-ink">wherever you are.</span></h1>
+        <p class="hero-description">Talk, ask, and get a little help. Miu brings a friendly face and offline AI to your phone and laptop.</p>
+        <div class="hero-actions"><a class="button" href="#download">Find your Miu <svg class="icon"><use href="#i-arrow"/></svg></a><a class="text-link" href="#meet">Meet your companion <span aria-hidden="true">↓</span></a></div>
+        <p class="platform-note"><svg class="icon"><use href="#i-windows"/></svg> Windows <span>·</span><svg class="icon"><use href="#i-android"/></svg> Android <span class="note-end">Your device. Your little companion.</span></p>
+      </div>
+      <div class="mascot-stage" data-mood="happy">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="stage-star star-one" aria-hidden="true">✧</span><span class="stage-star star-two" aria-hidden="true">✦</span>
+        <div class="hello-bubble" id="miu-caption" aria-live="polite">Oh, hi. I’m Miu <span aria-hidden="true">✦</span></div>
+        <button class="mascot-button" id="mascot-button" aria-label="Change Miu’s reaction">
+          <svg class="mascot" viewBox="0 0 340 320" aria-hidden="true"><use href="#miu-shell"/><g class="face-motion"><use id="hero-face" href="#face-happy"/></g></svg>
+        </button>
+        <div class="mascot-shadow"></div><div class="stage-sticker"><svg class="icon"><use href="#i-spark"/></svg> A little personality.<br>A whole lot of Miu.</div>
+        <div class="reaction-picker"><p>MOVE YOUR CURSOR. SAY HELLO.</p><div role="group" aria-label="Try a Miu expression"><button data-mood="happy" aria-pressed="true">Happy</button><button data-mood="curious" aria-pressed="false">Curious</button><button data-mood="playful" aria-pressed="false">Playful</button><button data-mood="sleepy" aria-pressed="false">Sleepy</button></div></div>
+      </div>
+    </section>
+    <div class="proof-strip wrap" aria-label="Miu at a glance"><span><svg class="icon"><use href="#i-device"/></svg> AI on your device</span><span><svg class="icon"><use href="#i-spark"/></svg> 24 expressive faces</span><span><svg class="icon"><use href="#i-mic"/></svg> A voice to talk to</span><span><svg class="icon"><use href="#i-lock"/></svg> No chat subscription</span></div>
+
+    <section class="meet-section wrap section" id="meet" aria-labelledby="meet-title">
+      <div class="section-heading"><div><p class="eyebrow">SMALL PRESENCE. EVERYDAY HELP.</p><h2 id="meet-title">A familiar face.<br>In your kind of space.</h2></div><p>At your desk or out in the world, Miu is a little closer than another browser tab.</p></div>
+      <div class="platform-stories">
+        <article class="pocket-story">
+          <div class="story-text"><span class="overline">01 / IN YOUR POCKET</span><h3>A little hello,<br>just a press away.</h3><p>Choose Miu as your Android assistant to bring up its compact black panel. Talk, type, then get back to your day.</p><a href="#android-download" class="under-link">Meet Miu for Android <span aria-hidden="true">↗</span></a></div>
+          <div class="phone-halo"></div><img class="phone-shot" src="assets/android-assistant.png" width="1080" height="2400" alt="Miu’s compact Android assistant panel with its mascot, Mic and Type buttons" loading="lazy">
+          <span class="photo-note">Actual app · Assistant gesture varies by phone</span>
+        </article>
+        <article class="desktop-story">
+          <div class="story-text"><span class="overline">02 / ON YOUR DESKTOP</span><h3>Good company.<br>Small footprint.</h3><p>A movable companion on your Windows desktop. Open a supported app, save a note, or take a moment to chat.</p><a href="#windows-download" class="under-link">Meet Miu for Windows <span aria-hidden="true">↗</span></a></div>
+          <div class="desktop-illustration" role="img" aria-label="Illustration of Miu as a floating companion on a Windows desktop"><div class="window-top"><span>My little workspace</span><span aria-hidden="true">— &nbsp; □ &nbsp; ×</span></div><div class="desk-lines"><span></span><span></span><span></span><span></span></div><div class="desk-note"><span>✦ &nbsp; One small thing at a time.</span></div><svg class="desk-miu" viewBox="0 0 340 320" aria-hidden="true"><use href="#miu-shell"/><use href="#face-happy"/></svg><div class="shortcut"><kbd>Ctrl</kbd><span>+</span><kbd>Alt</kbd><span>+</span><kbd>Space</kbd><span>to talk</span></div></div>
+          <span class="photo-note">Companion illustration · Model loads only for a reply</span>
+        </article>
+      </div>
+      <div class="everyday-list"><article><svg class="icon"><use href="#i-mic"/></svg><h3>Just say a little something.</h3><p>Tap the mic, speak, and hear a reply. Windows includes offline speech; Android uses its installed English speech services.</p></article><article><svg class="icon"><use href="#i-spark"/></svg><h3>More than a still face.</h3><p>Curious questions, good news, quiet moments. Miu’s expressions follow conversational text, with gentle motion as it talks.</p></article><article><svg class="icon"><use href="#i-device"/></svg><h3>Help with the little things.</h3><p>Check the time, take a note, or open a supported app. Optional email and screen features are available with your permission.</p></article></div>
+    </section>
+
+    <section class="offline-section" id="offline" aria-labelledby="offline-title"><div class="offline-inner wrap">
+      <div class="offline-art" aria-hidden="true"><div class="device-line"><svg viewBox="0 0 340 320" class="offline-miu"><use href="#miu-shell"/><use href="#face-sleepy"/></svg><span class="local-badge"><svg class="icon"><use href="#i-lock"/></svg> Right here. On your device.</span></div><div class="device-foot"></div><span class="offline-spark">✧</span></div>
+      <div class="offline-copy"><p class="eyebrow">LESS CLOUD. MORE COMPANION.</p><h2 id="offline-title">Your next conversation<br>doesn’t need a server.</h2><p>Gemma 3 is included in Miu’s download. General chat runs on your own device, without an AI account, API key, or dedicated GPU.</p><div class="offline-points"><div><span>01</span><p><strong>Local by default.</strong> Offline chat stays on the device. Cloud chat is an optional choice you make.</p></div><div><span>02</span><p><strong>Ready, then resting.</strong> The model loads for an answer and unloads afterward. Miu doesn’t keep a large AI model running in the background.</p></div><div><span>03</span><p><strong>Clear about its limits.</strong> It’s a small model, and it can make mistakes. Device commands stay separate from generated answers.</p></div></div><a class="under-link" href="https://github.com/KumarManuSaraswat/miu/blob/main/docs/OFFLINE_AI.md">Read about offline AI &amp; resources <span aria-hidden="true">↗</span></a></div>
+    </div></section>
+
+    <section class="open-section wrap section" id="personality" aria-labelledby="personality-title"><div class="open-copy"><p class="eyebrow">A LITTLE FACE. A LOT OF FEELING.</p><h2 id="personality-title">Not every hello<br>needs to look the same.</h2><p>A curious look for your next question. A playful face for a silly joke. A quiet little blink when the day slows down.</p><p>With 24 expressions and gentle animation, Miu brings a little personality to everyday conversations. Pick a favorite resting face, choose a voice, and make Miu feel a little more yours.</p><div class="open-actions"><a class="button" href="#download">Bring Miu along <svg class="icon"><use href="#i-arrow"/></svg></a><a class="text-link" href="#top">Try the faces above ↑</a></div><div class="built-with"><span>YOUR LITTLE EVERYDAY COMPANION</span><p>Talk naturally <i>·</i> Watch Miu react <i>·</i> Keep it close</p></div></div><div class="community-art" aria-hidden="true"><span class="doodle-ring"></span><svg class="friend friend-one" viewBox="0 0 340 320"><use href="#miu-shell"/><use href="#face-playful"/></svg><svg class="friend friend-two" viewBox="0 0 340 320"><use href="#miu-shell"/><use href="#face-blushing"/></svg><span class="community-label">a little curious.<br>a little playful.<br>a little Miu.</span><span class="community-star">✦</span></div></section>
+
+    <section class="download-section wrap" id="download" aria-labelledby="download-title"><div class="download-intro"><p class="eyebrow">MAKE A LITTLE ROOM FOR MIU</p><h2 id="download-title">Your Miu is waiting.</h2><p>One download. Offline AI included. A little company, on your terms.</p><span class="version-tag">VERSION 1.0.1</span></div><div class="download-grid">
+      <article class="download-card" id="android-download"><div class="download-title"><span class="platform-icon"><svg class="icon"><use href="#i-android"/></svg></span><div><h3>Miu for Android</h3><p>For the moments between everything.</p></div></div><a class="button download-button" href="https://github.com/KumarManuSaraswat/miu/releases/download/v1.0.1/miu-1.0.1-android.apk">Download Android APK <svg class="icon"><use href="#i-down"/></svg></a><p class="file-note">793 MB · Signed APK · Free</p><ul class="requirements"><li>Android 9 or newer · ARM64</li><li>4 GB RAM recommended · Around 3 GB free storage</li><li>English speech pack &amp; microphone permission for voice</li></ul><details class="install-help"><summary>How to get started <span aria-hidden="true">+</span></summary><ol><li>Download the APK on your phone and open it.</li><li>Approve Android’s normal installation prompts, then open Miu.</li><li>Tap Mic and allow microphone access, or type a question. The included model prepares on first use.</li></ol><p>For the assistant gesture, open Miu Settings → Use Miu as phone assistant. Your phone controls the gesture.</p></details><a class="under-link" href="https://github.com/KumarManuSaraswat/miu/blob/main/android/README.md">Full Android setup guide ↗</a></article>
+      <article class="download-card" id="windows-download"><div class="download-title"><span class="platform-icon"><svg class="icon"><use href="#i-windows"/></svg></span><div><h3>Miu for Windows</h3><p>A little presence on your desktop.</p></div></div><a class="button download-button light-button" href="https://github.com/KumarManuSaraswat/miu/releases/download/v1.0.1/miu-1.0.1-windows-x64.zip">Download Windows ZIP <svg class="icon"><use href="#i-down"/></svg></a><p class="file-note">1.21 GB · Portable ZIP · Free</p><ul class="requirements"><li>64-bit Windows with .NET Framework 4.8</li><li>Windows 11 &amp; 8 GB RAM recommended</li><li>Around 3 GB free storage · Offline English voice included</li></ul><details class="install-help"><summary>How to get started <span aria-hidden="true">+</span></summary><ol><li>Download and extract the entire ZIP into a writable folder.</li><li>Open <strong>Start Miu.cmd</strong>. Keep all included folders together.</li><li>Click the mascot, or press Ctrl + Alt + Space to talk.</li></ol><p>Updating? Quit the old Miu before opening the new version. The Windows executable is currently unsigned.</p></details><a class="under-link" href="https://github.com/KumarManuSaraswat/miu#readme">Full Windows setup guide ↗</a></article>
+    </div><p class="download-footnote">Downloaded directly from our GitHub releases. <a href="https://github.com/KumarManuSaraswat/miu/releases/tag/v1.0.1">Release notes &amp; checksums ↗</a></p></section>
+
+    <section class="faq-section wrap section" aria-labelledby="faq-title"><div><p class="eyebrow">A FEW LITTLE ANSWERS</p><h2 id="faq-title">Before you say hello.</h2><p>Something else on your mind?<br><a class="under-link" href="https://github.com/KumarManuSaraswat/miu/issues">Get help with Miu ↗</a></p></div><div class="faq-list"><details><summary>Is Miu really free?<span aria-hidden="true">+</span></summary><p>Yes. The Windows and Android downloads include offline Gemma chat with no subscription, Miu account, or AI API key. The original app code is MIT licensed. Gemma and the bundled dependencies have their own terms. Optional cloud features use your own provider account and its limits.</p></details><details><summary>Does everything work without internet?<span aria-hidden="true">+</span></summary><p>General Gemma chat, expressions and supported local commands work offline. Windows includes offline English speech. Android voice depends on an installed speech provider and English language pack. Gmail, web searches, the optional preset catalog and optional Gemini chat need a connection.</p></details><details><summary>Can Miu read my emails and messages?<span aria-hidden="true">+</span></summary><p>Only through optional features you set up and explicitly request. Android can read accessible content from Gmail and WhatsApp on screen after separate permissions; these features are experimental and depend on those apps. WhatsApp sends require review. Windows Gmail uses your own read-only Google authorization setup. Fetched email and screen results stay out of general AI prompts.</p></details><details><summary>How much memory does it need?<span aria-hidden="true">+</span></summary><p>The bundled model is about 806 MB on disk. Our CPU samples used roughly 0.9 GiB of model-process memory on Windows and 1.3 GiB on Android, plus the app and speech services. The model unloads between replies. Actual use varies by device; a small floating mascot does not mean the AI itself uses no memory. See the <a href="https://github.com/KumarManuSaraswat/miu/blob/main/docs/OFFLINE_AI.md">resource measurements</a>.</p></details><details><summary>Is this Google’s app?<span aria-hidden="true">+</span></summary><p>No. Miu is an independent open-source project led by Ancient Dragon. Google created Gemma, the included language model. Miu’s interface, mascot, local tools and integrations are part of the Miu project. Miu is not affiliated with Google.</p></details></div></section>
+  </main>
+  <footer class="site-footer wrap"><div class="footer-top"><a class="brand" href="#top" aria-label="Back to Miu home"><img src="assets/favicon.svg" width="36" height="36" alt=""><span>miu</span></a><p>A little company. Right here.</p><a href="#top" class="back-top" aria-label="Back to top">↑</a></div><div class="footer-bottom"><span>© 2026 Miu. A free, open-source project led by Ancient Dragon.</span><nav aria-label="Footer"><a href="https://github.com/KumarManuSaraswat/miu">GitHub ↗</a><a href="https://github.com/KumarManuSaraswat/miu/blob/main/PRIVACY.md">App privacy</a><a href="https://github.com/KumarManuSaraswat/miu/blob/main/docs/MODEL_TERMS.md">Model terms</a><a href="https://github.com/KumarManuSaraswat/miu/blob/main/SECURITY.md">Security</a></nav></div><p class="site-note">This website uses no Miu analytics, accounts or contact forms. Hosting providers may process ordinary connection logs. The mascot above is an interactive visual preview, not a browser AI chat.</p></footer>
+</body>
+</html>

@@ -33,6 +33,9 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Check the static product website
+        working-directory: website
+        run: npm run check
       - name: Install locked catalog dependencies
         working-directory: services/catalog
         run: npm ci --ignore-scripts --no-audit --no-fund

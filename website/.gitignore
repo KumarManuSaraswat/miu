@@ -1,0 +1,4 @@
+.sites-cache/
+.openai/local/
+node_modules/
+*.log
