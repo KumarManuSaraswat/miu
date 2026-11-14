@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://miu-companion.kumarsaraswat1983.chatgpt.site/sitemap.xml
