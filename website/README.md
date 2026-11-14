@@ -5,6 +5,8 @@ The site is static HTML, CSS and JavaScript. No framework, build step, account,
 tracking, or paid API is required. Download links point to the official signed
 Android APK and portable Windows ZIP in the Miu GitHub releases.
 
+Live site: [miu-companion.vercel.app](https://miu-companion.vercel.app/).
+
 ## Work locally
 
 Run `npm run dev` with Node.js 18 or newer, then open
@@ -15,6 +17,19 @@ of `dist/` on a static web host. Keep the canonical URL, Open Graph URL,
 For a new app release, update the version, download filenames, sizes, requirements,
 and structured data in `dist/index.html`, then check the actual release assets.
 Do not assume all app features work offline: the FAQ explains the distinctions.
+
+## Vercel hosting
+
+The `miu-companion` project uses the existing Vercel Hobby plan and is connected
+to this public repository. Its production branch is `main`, Root Directory is
+`website`, and Output Directory is `dist`. The build runs `npm run check`; there
+are no dependencies to install and no server functions or environment secrets.
+`vercel.json` keeps those build settings in source control. Updates to this
+directory on `main` deploy automatically through the Git integration.
+
+For another account, import the repository in Vercel, select the `website` root,
+and choose the Other framework preset. Do not set the repository root as the
+public output directory. Keep `.vercel/` local project metadata out of Git.
 
 ## Mascot
 

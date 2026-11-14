@@ -8,7 +8,7 @@ Built by a group of developers led by **Ancient Dragon**. Miu's included offline
 
 **Miu 1.0 · Windows x64 and Android 9+ ARM64 · Offline Gemma 3 included.** Download, extract or install, and chat without an account, API key, server or GPU. Original application code is MIT licensed; bundled model weights have [their own terms](docs/MODEL_TERMS.md).
 
-[Website](https://miu-companion.kumarsaraswat1983.chatgpt.site) · [Downloads](https://github.com/KumarManuSaraswat/miu/releases) · [Build status](https://github.com/KumarManuSaraswat/miu/actions/workflows/windows.yml) · [Commands](docs/COMMANDS.md) · [Support](SUPPORT.md) · [Contribute](CONTRIBUTING.md)
+[Website](https://miu-companion.vercel.app) · [Downloads](https://github.com/KumarManuSaraswat/miu/releases) · [Build status](https://github.com/KumarManuSaraswat/miu/actions/workflows/windows.yml) · [Commands](docs/COMMANDS.md) · [Support](SUPPORT.md) · [Contribute](CONTRIBUTING.md)
 
 ## Android
 
