@@ -29,6 +29,7 @@ Download `miu-1.0.1-windows-x64.zip` from [Releases](https://github.com/KumarMan
 The ready-to-use download includes Gemma, offline English recognition and the natural English voice. No setup scripts or separate AI downloads are needed. Allow about 3 GB free space for the ZIP and extraction. Dependency licenses and speech sources travel with the download; see [speech bundle details](docs/SPEECH_BUNDLE.md). Developer/CI archives omit downloaded runtimes and are not the end-user bundle.
 
 - Click the mascot to open chat; drag it to move it.
+- Current development builds: the Windows mascot gently looks toward your cursor across the desktop. Eye movement pauses during sleep, dragging, or reduced animation; no pointer history is stored or sent anywhere. This is not yet in the 1.0.1 download.
 - Tap the microphone or press **Ctrl+Alt+Space**. Wait for **Listening offline**, speak one request, then pause.
 - The meter shows input activity. Uncertain recognition is put in the message box for review before anything runs.
 - Tap the mic during a reply to interrupt and start listening. Press **Esc** to cancel.

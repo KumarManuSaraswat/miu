@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Windows mascot eyes gently follow the desktop cursor while blinking and speech remain independent. Tracking uses bounded, smoothed coordinates and slows when settled; it pauses when hidden, minimized, sleeping, the session is locked, or reduced animation is enabled. No input hooks, cursor history or network calls are used.
+
 ## 1.0.1 — conversational reactions
 
 - Restored contextual faces for offline Gemma replies on Windows and Android.

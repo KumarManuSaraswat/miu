@@ -20,8 +20,9 @@ namespace Miu
                 int result = EngineTests.Run();
                 int gmailResult = GmailTests.Run();
                 int catalogResult = CommunityCatalogTests.Run();
-                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "self-test-results.txt"), EngineTests.LastReport + "\r\n" + GmailTests.LastReport + "\r\n" + CommunityCatalogTests.LastReport);
-                return result == 0 && gmailResult == 0 && catalogResult == 0 ? 0 : 1;
+                int gazeResult = MascotGazeTests.Run();
+                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "self-test-results.txt"), EngineTests.LastReport + "\r\n" + GmailTests.LastReport + "\r\n" + CommunityCatalogTests.LastReport + "\r\n" + MascotGazeTests.LastReport);
+                return result == 0 && gmailResult == 0 && catalogResult == 0 && gazeResult == 0 ? 0 : 1;
             }
             if (args.Length > 0 && args[0] == "--diagnostics")
             {

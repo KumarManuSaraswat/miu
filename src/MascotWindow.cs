@@ -1,9 +1,12 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Win32;
 
 namespace Miu
 {
@@ -13,8 +16,15 @@ namespace Miu
         private readonly AppController app;
         private readonly TextBlock status;
         private readonly DispatcherTimer blink = new DispatcherTimer(), unblink = new DispatcherTimer(), motion = new DispatcherTimer();
+        private readonly DispatcherTimer gaze = new DispatcherTimer(DispatcherPriority.Background);
+        private static readonly TimeSpan GazeMoving = TimeSpan.FromMilliseconds(50), GazeResting = TimeSpan.FromMilliseconds(250);
         private Point down;
-        private bool dragged;
+        private bool dragged, dragging, closed, sessionLocked, watchingSystem;
+        [StructLayout(LayoutKind.Sequential)]
+        private struct CursorPoint { public int X, Y; }
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetCursorPos(out CursorPoint point);
         public MascotWindow(AppController controller)
         {
             app = controller;
@@ -40,8 +50,9 @@ namespace Miu
                 Point now = e.GetPosition(this);
                 if (Math.Abs(now.X - down.X) + Math.Abs(now.Y - down.Y) > 6)
                 {
-                    dragged = true; Face.ReleaseMouseCapture();
+                    dragged = true; dragging = true; Face.ReleaseMouseCapture(); Face.SetGaze(new Point());
                     try { DragMove(); } catch (InvalidOperationException) { }
+                    finally { dragging = false; }
                     KeepOnScreen(); app.Settings.MascotLeft = Left; app.Settings.MascotTop = Top; app.SaveSettings();
                 }
             };
@@ -65,6 +76,13 @@ namespace Miu
                 Left = app.Settings.MascotLeft < 0 ? area.Right - Width - 24 : app.Settings.MascotLeft;
                 Top = app.Settings.MascotTop < 0 ? area.Bottom - Height - 16 : app.Settings.MascotTop;
                 KeepOnScreen();
+                if (!watchingSystem)
+                {
+                    SystemEvents.SessionSwitch += SessionChanged;
+                    SystemParameters.StaticPropertyChanged += SystemAppearanceChanged;
+                    watchingSystem = true;
+                }
+                UpdateGazeTracking();
             };
             blink.Interval = TimeSpan.FromSeconds(4.5);
             blink.Tick += delegate { if (!app.Settings.ReducedMotion && !app.Sleeping) { Face.Blink = true; Face.InvalidateVisual(); unblink.Start(); } };
@@ -72,8 +90,55 @@ namespace Miu
             unblink.Tick += delegate { unblink.Stop(); Face.Blink = false; Face.InvalidateVisual(); };
             motion.Interval = TimeSpan.FromMilliseconds(150);
             motion.Tick += delegate { Face.Frame++; Face.InvalidateVisual(); };
+            gaze.Interval = GazeResting;
+            gaze.Tick += delegate { TrackCursor(); };
+            IsVisibleChanged += delegate { UpdateGazeTracking(); };
+            StateChanged += delegate { UpdateGazeTracking(); };
             blink.Start();
-            Closed += delegate { blink.Stop(); unblink.Stop(); motion.Stop(); };
+            Closed += delegate
+            {
+                closed = true; blink.Stop(); unblink.Stop(); motion.Stop(); gaze.Stop();
+                if (watchingSystem)
+                {
+                    SystemEvents.SessionSwitch -= SessionChanged;
+                    SystemParameters.StaticPropertyChanged -= SystemAppearanceChanged;
+                }
+            };
+        }
+        private void SessionChanged(object sender, SessionSwitchEventArgs e)
+        {
+            if (e.Reason != SessionSwitchReason.SessionLock && e.Reason != SessionSwitchReason.SessionUnlock) return;
+            if (Dispatcher.HasShutdownStarted || closed) return;
+            Dispatcher.BeginInvoke(new Action(delegate { sessionLocked = e.Reason == SessionSwitchReason.SessionLock; UpdateGazeTracking(); }));
+        }
+        private void SystemAppearanceChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "ClientAreaAnimation" || Dispatcher.HasShutdownStarted || closed) return;
+            Dispatcher.BeginInvoke(new Action(UpdateGazeTracking));
+        }
+        private void UpdateGazeTracking()
+        {
+            if (closed || !IsLoaded || !IsVisible || WindowState == WindowState.Minimized || sessionLocked || app.Sleeping || app.Settings.ReducedMotion || !SystemParameters.ClientAreaAnimation)
+            {
+                gaze.Stop(); Face.SetGaze(new Point()); return;
+            }
+            if (!gaze.IsEnabled) { gaze.Interval = GazeResting; gaze.Start(); TrackCursor(); }
+        }
+        private void TrackCursor()
+        {
+            CursorPoint cursor;
+            // Read coordinates only: no mouse hook, input interception, history or network.
+            if (dragging || Face.IsMouseCaptured || (Face.ContextMenu != null && Face.ContextMenu.IsOpen) || !GetCursorPos(out cursor))
+            {
+                Face.SetGaze(new Point()); gaze.Interval = GazeResting; return;
+            }
+            Point local = Face.PointFromScreen(new Point(cursor.X, cursor.Y));
+            Point target = MascotGaze.Target(local, Face.RenderSize);
+            Point next = MascotGaze.Step(Face.GazeOffset, target);
+            Face.SetGaze(next);
+            // No redraws once settled. Poll slowly until the cursor moves again.
+            TimeSpan interval = next == target ? GazeResting : GazeMoving;
+            if (gaze.Interval != interval) gaze.Interval = interval;
         }
         private static void AddMenu(ContextMenu menu, string text, Action action) { var item = new MenuItem { Header = text }; item.Click += delegate { action(); }; menu.Items.Add(item); }
         private void KeepOnScreen()
@@ -87,6 +152,7 @@ namespace Miu
             Face.Mood = mood; status.Text = caption; Face.InvalidateVisual();
             if ((Face.IsTalking || mood == "speaking") && !app.Settings.ReducedMotion) motion.Start(); else motion.Stop();
             if (mood == "sleepy" || app.Settings.ReducedMotion) blink.Stop(); else if (!blink.IsEnabled) blink.Start();
+            UpdateGazeTracking();
         }
         public void SetTalking(bool talking)
         {
