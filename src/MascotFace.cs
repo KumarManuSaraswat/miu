@@ -13,6 +13,12 @@ namespace Miu
         public int Frame;
         public int AudioLevel;
         public bool ShowBody = true;
+        internal Point GazeOffset { get; private set; }
+        internal bool SetGaze(Point offset)
+        {
+            if (GazeOffset == offset) return false;
+            GazeOffset = offset; InvalidateVisual(); return true;
+        }
         private static SolidColorBrush Brush(string hex) { var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); brush.Freeze(); return brush; }
         private static readonly Brush White = Brush("#F5F5FA"), Dim = Brush("#858995");
         private static readonly DrawingGroup Body = MakeBody();
@@ -269,8 +275,10 @@ namespace Miu
             else dc.DrawRoundedRectangle(Brush("#101115"), null, new Rect(26, 45, 136, 113), 36, 36);
             string mood = Mood ?? "idle";
             string expression = Expression(mood);
+            dc.PushTransform(new TranslateTransform(GazeOffset.X, GazeOffset.Y));
             DrawEyes(dc, expression, (Blink && CanBlink(expression)) || mood == "sleepy");
             DrawAccents(dc, expression);
+            dc.Pop();
             bool talking = IsTalking || mood == "speaking";
             int phase = Math.Abs(Frame % 4);
             if (talking && (expression == "cheerful" || expression == "idle" || expression == "content" || expression == "neutral"))
@@ -297,5 +305,29 @@ namespace Miu
                 Path(dc, "M 139,25 L 148,25 L 139,34 L 148,34 M 153,12 L 165,12 L 153,23 L 165,23", null, Line(Dim, 2.3));
             dc.Pop(); dc.Pop();
         }
+    }
+
+    // Coordinates match the face's 180-unit drawing, independent of window size/DPI.
+    internal static class MascotGaze
+    {
+        internal static Point Target(Point pointer, Size size)
+        {
+            if (!Finite(pointer.X) || !Finite(pointer.Y) || !Finite(size.Width) || !Finite(size.Height) || size.Width <= 0 || size.Height <= 0) return new Point();
+            double scale = Math.Min(size.Width / 180, size.Height / 180);
+            double x = ((pointer.X - (size.Width - 180 * scale) / 2) / scale - 94) / 90;
+            double y = ((pointer.Y - (size.Height - 180 * scale) / 2) / scale - 95) / 90;
+            if (!Finite(x) || !Finite(y)) return new Point();
+            double length = Math.Max(1, Math.Sqrt(x * x + y * y));
+            return new Point(x / length * 6, y / length * 4);
+        }
+        internal static Point Step(Point current, Point target)
+        {
+            return new Point(Ease(current.X, target.X), Ease(current.Y, target.Y));
+        }
+        private static double Ease(double current, double target)
+        {
+            return Math.Abs(target - current) < 0.05 ? target : current + (target - current) * 0.4;
+        }
+        private static bool Finite(double value) { return !Double.IsNaN(value) && !Double.IsInfinity(value); }
     }
 }

@@ -173,4 +173,5 @@ Start Miu.cmd
 SUPPORT.md
 tests/CommunityCatalogTests.cs
 tests/EngineTests.cs
+tests/MascotGazeTests.cs
 tests/GmailTests.cs
