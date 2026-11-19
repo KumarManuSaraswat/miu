@@ -14,7 +14,7 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@neondatabase/serverless": "1.2.0"
+    "@neondatabase/serverless": "1.2.1"
   },
   "devDependencies": {
     "wrangler": "4.161.0"
